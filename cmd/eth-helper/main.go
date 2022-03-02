@@ -1,28 +1,47 @@
 package main
 
 import (
+	"eth-helper/message"
+	"eth-helper/server"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
+	"log"
+	"os"
+
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	go WatchTransfer()
-	select {}
-}
+	app := cli.NewApp()
+	app.Name = "eth-helper"
+	app.Usage = "a eth helper server"
 
-//监听盲盒价格变化
-func WatchTransfer() {
-	c := GetClient()
-	defer c.Client.Close()
+	app.Flags = []cli.Flag{
+		// 有参数则用参数，没参数才会使用环境变量
+		&cli.StringFlag{
+			Name:  "port",
+			Value: "7888",
+			Usage: "port of the server",
+			// Destination: &port,
+			EnvVars: []string{"BLOCKCHAIN_PORT"},
+		},
+	}
 
-	ch := make(chan *PkgnameTransfer, 100)
-	from := []common.Address{}
-	to := []common.Address{}
-	c.Filter.WatchTransfer(nil, ch, from, to)
-	for {
-		select {
-		case a := <-ch:
-			fmt.Sprintf("from=%s,to=%s,数量=%d,交易hash=%s", a.From, a.To, a.Value.Int64(), a.Raw.TxHash)
-		}
+	app.Action = func(c *cli.Context) error {
+		port := c.String("port")
+
+		message.Init()
+		// test
+		message.TestHttp()
+
+		// 4、开启Http服务
+		params := fmt.Sprintf(":%s", port)
+		server.StartHTTPServer(params)
+
+		return nil
+	}
+
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
 	}
 }

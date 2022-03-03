@@ -1,18 +1,16 @@
 package ethevent
 
 import (
-	"context"
 	"eth-helper/db"
 	"eth-helper/erc20"
 
-	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 )
 
 // var messageChan = make(chan *erc20.TokenERC20Transfer, 100)
 
-// Init init watch
-func Init() {
+// InitWatchTransfer 初始化监听交易
+func InitWatchTransfer() {
 	// go watchChan()
 
 	go watchTransfer()
@@ -48,9 +46,6 @@ func watchTransfer() {
 
 	log.Infoln("WatchTransfer------------")
 
-	srt, err := c.Client.TransactionReceipt(context.Background(), common.HexToHash("0xb14b073a8e87aa0c82d254c363dd05a04cee2eb705be704818d37f7adb82b4f3"))
-
-	log.Infof("srt------------Status:%v,BlockNumber:%v", srt.Status, srt.BlockNumber)
 	for {
 		select {
 		case err := <-sub.Err():
@@ -66,7 +61,10 @@ func watchTransfer() {
 }
 
 func newTransfer(transfer *erc20.TokenERC20Transfer) {
-	db.SaveNewTransfer(transfer.To.Hex(), transfer.From.Hex(), transfer.Raw.TxHash.Hex(), transfer.Value.Int64())
+	err := db.SaveNewTransfer(transfer.To.Hex(), transfer.From.Hex(), transfer.Raw.TxHash.Hex(), transfer.Value.Int64(), transfer.Raw.BlockNumber)
+	if err != nil {
+		log.Errorf("newTransfer SaveNewTransfer err : %v", err)
+	}
 }
 
 // func testChan() {

@@ -22,6 +22,16 @@ type MAddressInfo struct {
 	Msg        string `json:"msg"`        // 备注信息
 }
 
+// MTransferInfo 地址
+type MTransferInfo struct {
+	ID          int64  `json:"id"`
+	To          string `json:"to"`          // to
+	From        string `json:"from"`        // from
+	Txhash      string `json:"txhash"`      // 交易哈希
+	Value       int64  `json:"value"`       // 交易值
+	Blocknumber int64  `json:"blocknumber"` // blocknumber
+}
+
 var (
 	sqlUseName    = ""
 	sqlPassword   = ""

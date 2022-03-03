@@ -5,10 +5,13 @@ eth
 3、提现:钱包服务提供接口勇于提现,传入to地址、金额、钱包服务发起转账
 4、归集:钱包服务内部将用户地址上的币进行归集到指定地址
 
-
 生成地址,离线生成,手动生成
 私钥加密保存
 mysql写入限制   max_allowed_packet
 keystore 每个address 一个文件  批量处理会不会卡
 
-
+监听消息的时候   拿到交易哈希、BlockNumber
+先保存哈希、BlockNumber
+然后隔一段时间,看看当前BlockNumber是不是比上面的BlockNumber大某一高度
+如果是,则拿这个哈希去TransactionReceipt
+看看status  如果是1  则算是交易完成

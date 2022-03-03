@@ -1,6 +1,7 @@
 package main
 
 import (
+	"eth-helper/db"
 	"eth-helper/ethevent"
 	"os"
 
@@ -23,12 +24,40 @@ func main() {
 			// Destination: &port,
 			EnvVars: []string{"BLOCKCHAIN_PORT"},
 		},
+		&cli.StringFlag{
+			Name:  "sqluse",
+			Value: "root",
+			Usage: "sql username",
+			// Destination: &sqluse,
+			EnvVars: []string{"BLOCKCHAIN_SQLUSE"},
+		},
+		&cli.StringFlag{
+			Name:  "sqlpass",
+			Value: "123456",
+			Usage: "sql password",
+			// Destination: &sqlpass,
+			EnvVars: []string{"BLOCKCHAIN_SQLPASS"},
+		},
+		&cli.StringFlag{
+			Name:  "sqldab",
+			Value: "test",
+			Usage: "sql database",
+			// Destination: &sqldab,
+			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
 		// port := c.String("port")
-
-		ethevent.Init()
+		sqluse := c.String("sqluse")
+		sqlpass := c.String("sqlpass")
+		sqldatabase := c.String("sqldab")
+		// 初始化DB
+		db.InitDB(sqluse, sqlpass, sqldatabase)
+		// 监听交易消息
+		ethevent.InitWatchTransfer()
+		// 初始化检查交易定时器
+		go ethevent.InitTask()
 		// test
 		// ethevent.TestHttp()
 

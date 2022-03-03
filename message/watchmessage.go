@@ -1,11 +1,15 @@
 package message
 
 import (
+	"context"
 	"eth-helper/erc20"
+	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +22,9 @@ func Init() {
 	watchTransfer()
 
 	// test
-	testChan()
+	// testChan()
+
+	// go test()
 }
 
 func watchChan() {
@@ -44,6 +50,13 @@ func watchTransfer() {
 	}
 
 	log.Infoln("WatchTransfer------------")
+
+	for {
+		select {
+		case a := <-messageChan:
+			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", a.From, a.To, a.Value.Int64(), a.Raw.TxHash)
+		}
+	}
 }
 
 func testChan() {
@@ -53,5 +66,34 @@ func testChan() {
 		To:    common.HexToAddress("00000000000000000"),
 		Value: big.NewInt(int64(256788)),
 		Raw:   types.Log{},
+	}
+}
+
+func test() {
+	client, err := ethclient.Dial("wss://mainnet.infura.io/ws/v3/a5c713d632f944df9a77d56cf08f9083")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	contractAddress := common.HexToAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7")
+	query := ethereum.FilterQuery{
+		Addresses: []common.Address{contractAddress},
+	}
+
+	logs := make(chan types.Log)
+
+	sub, err := client.SubscribeFilterLogs(context.Background(), query, logs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		select {
+		case err := <-sub.Err():
+			log.Fatal(err)
+		case vLog := <-logs:
+			fmt.Println(vLog) // pointer to event log
+			log.Infoln("WatchTransfer------------")
+		}
 	}
 }

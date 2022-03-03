@@ -2,8 +2,6 @@ package main
 
 import (
 	"eth-helper/message"
-	"eth-helper/server"
-	"fmt"
 	"log"
 	"os"
 
@@ -27,15 +25,15 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		port := c.String("port")
+		// port := c.String("port")
 
-		message.Init()
+		// message.Init()
 		// test
 		message.TestHttp()
 
 		// 4、开启Http服务
-		params := fmt.Sprintf(":%s", port)
-		server.StartHTTPServer(params)
+		// params := fmt.Sprintf(":%s", port)
+		// server.StartHTTPServer(params)
 
 		return nil
 	}
@@ -44,4 +42,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// test
+	select {}
 }

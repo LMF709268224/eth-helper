@@ -1,6 +1,7 @@
 package main
 
 import (
+	"eth-helper/ethevent"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		// port := c.String("port")
 
-		// ethevent.Init()
+		ethevent.Init()
 		// test
 		// ethevent.TestHttp()
 

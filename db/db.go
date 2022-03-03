@@ -23,10 +23,11 @@ type MAddressInfo struct {
 }
 
 var (
-	sqlUseName   = ""
-	sqlPassword  = ""
-	sqlDatabase  = ""
-	addressTable = "eth_address_key"
+	sqlUseName    = ""
+	sqlPassword   = ""
+	sqlDatabase   = ""
+	addressTable  = "eth_address_key"
+	transferTable = "eth_transfer_key"
 )
 
 // var addressTableMap = map[structconst.BlockchainType]string{structconst.BlockchainTypeFilecoin: addressFilecoinTable}

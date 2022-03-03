@@ -6,9 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// CREATE TABLE `addressFilecoinTable` (
-// 	`id` int(11) NOT NULL AUTO_INCREMENT,
-// 	`address` varchar(255) NOT NULL UNIQUE COMMENT '地址',
+// CREATE TABLE `eth_address_key` (
+// 	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+// 	`address` varchar(64) NOT NULL UNIQUE COMMENT '地址',
+//  `pwd` varchar(512) NOT NULL COMMENT '加密私钥',
 // 	`ptype` varchar(50) NOT NULL COMMENT '类型',
 // 	`privateKey` blob COMMENT '私钥',
 // 	`keyType` varchar(50) NOT NULL COMMENT '私钥类型',
@@ -16,7 +17,7 @@ import (
 //  `balance` decimal(65,30) ZEROFILL DEFAULT '0' COMMENT '余额',
 // 	`addTime` datetime DEFAULT NULL,
 // 	PRIMARY KEY (`id`)
-//   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Filecoin地址表';
+//   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='eth地址表';
 
 // SaveNewAddress 保存新地址
 func SaveNewAddress(infos []MAddressInfo) error {
@@ -24,16 +25,36 @@ func SaveNewAddress(infos []MAddressInfo) error {
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
-	var err error
+	// var err error
+	// for _, data := range infos {
+	// 	execStr := fmt.Sprintf("insert into %s(address,ptype,privateKey,keyType,addTime) values(?,?,?,?,Now())", addressTable)
 
+	// 	_, e := db.Exec(execStr, data.Address, data.PType, data.PrivateKey, data.KeyType)
+	// 	if e != nil {
+	// 		err = e
+	// 		log.Errorln("sql SaveNewAddress err : ", e)
+	// 	}
+	// }
+	sqlStr := fmt.Sprintf("NSERT INTO %s(address,ptype,privateKey,keyType,addTime) VALUES", addressTable)
+	// sqlStr := "INSERT INTO test(n1, n2, n3) VALUES "
+	vals := []interface{}{}
 	for _, data := range infos {
-		execStr := fmt.Sprintf("insert into %s(address,ptype,privateKey,keyType,addTime) values(?,?,?,?,Now())", addressTable)
+		sqlStr += "(?,?,?,?,Now()),"
+		vals = append(vals, data.Address, data.PType, data.PrivateKey, data.KeyType)
+	}
+	// trim the last ,
+	sqlStr = sqlStr[0 : len(sqlStr)-1]
+	// prepare the statement
+	stmt, err := db.Prepare(sqlStr)
+	if err != nil {
+		log.Errorln("SaveNewAddress Prepare err : ", err)
+		return err
+	}
 
-		_, e := db.Exec(execStr, data.Address, data.PType, data.PrivateKey, data.KeyType)
-		if e != nil {
-			err = e
-			log.Errorln("sql SaveNewAddress err : ", e)
-		}
+	// format all vals at once
+	_, err = stmt.Exec(vals...)
+	if err != nil {
+		log.Errorln("SaveNewAddress Exec err : ", err)
 	}
 
 	return err

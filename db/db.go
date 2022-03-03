@@ -10,21 +10,23 @@ import (
 
 // MAddressInfo 地址
 type MAddressInfo struct {
-	ID         int64     `json:"id"`
-	Address    string    `json:"address"`    // 地址
-	AddTime    time.Time `json:"addtime"`    // 创建时间
-	PType      string    `json:"ptype"`      // 类型
-	PrivateKey []byte    `json:"privatekey"` // 私钥
-	KeyType    string    `json:"keytype"`    // 私钥类型
-	Msg        string    `json:"msg"`        // 备注信息
-	Balance    int64     `json:"balance"`    // 余额
+	ID      int64     `json:"id"`
+	Address string    `json:"address"` // 地址
+	Pwd     string    `json:"pwd"`     // 加密私钥
+	AddTime time.Time `json:"addtime"` // 创建时间
+
+	Balance    int64  `json:"balance"`    // 余额
+	PType      string `json:"ptype"`      // 类型
+	PrivateKey []byte `json:"privatekey"` // 私钥
+	KeyType    string `json:"keytype"`    // 私钥类型
+	Msg        string `json:"msg"`        // 备注信息
 }
 
 var (
 	sqlUseName   = ""
 	sqlPassword  = ""
 	sqlDatabase  = ""
-	addressTable = "addressTable"
+	addressTable = "eth_address_key"
 )
 
 // var addressTableMap = map[structconst.BlockchainType]string{structconst.BlockchainTypeFilecoin: addressFilecoinTable}

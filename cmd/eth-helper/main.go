@@ -1,9 +1,9 @@
 package main
 
 import (
-	"eth-helper/message"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/urfave/cli/v2"
 )
@@ -27,9 +27,9 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		// port := c.String("port")
 
-		// message.Init()
+		// ethevent.Init()
 		// test
-		message.TestHttp()
+		// ethevent.TestHttp()
 
 		// 4、开启Http服务
 		// params := fmt.Sprintf(":%s", port)

@@ -51,6 +51,7 @@ func checkTransfer() {
 	if err != nil {
 		return
 	}
+	log.Infoln("checkTransfer numDB...", numDB)
 
 	// 链上的高度
 	blockNumber, err := getBlockNumber(c)

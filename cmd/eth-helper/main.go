@@ -47,6 +47,14 @@ func main() {
 			// Destination: &sqldab,
 			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
 		},
+		// TEST
+		&cli.StringFlag{
+			Name:  "ca",
+			Value: "0",
+			Usage: "create address num",
+			// Destination: &sqldab,
+			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -57,15 +65,22 @@ func main() {
 
 		// 初始化DB
 		db.InitDB(sqluse, sqlpass, sqldatabase)
+
+		// test create address
+		ca := c.Int("ca")
+		if ca > 0 {
+			err := ethevent.NewAddresss(ca)
+			if err != nil {
+				log.Errorf("main NewAddresss err: %v", err.Error())
+			}
+		}
+
 		// 监听交易消息
 		ethevent.InitWatchTransfer()
 		// 初始化检查交易定时器
 		go ethevent.InitTask()
 
-		// test
-		// ethevent.TestHttp()
-
-		// 4、开启Http服务
+		// 开启Http服务
 		params := fmt.Sprintf(":%s", port)
 		server.StartHTTPServer(params)
 

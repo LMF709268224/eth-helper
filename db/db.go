@@ -36,9 +36,9 @@ var (
 	sqlUseName        = ""
 	sqlPassword       = ""
 	sqlDatabase       = ""
-	addressTable      = "eth_address_key"
-	transferTable     = "eth_transfer_key"
-	transferDoneTable = "eth_transferdone_key"
+	addressTable      = "eth_address_tb"
+	transferTable     = "eth_transfer_tb"
+	transferDoneTable = "eth_transferdone_tb"
 )
 
 // const (

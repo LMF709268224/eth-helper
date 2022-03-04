@@ -14,11 +14,23 @@ func SaveNewTransfer(info MTransferInfo) error {
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
+	tx, err := db.Begin()
+	if err != nil {
+		log.Errorln("sql SaveNewTransfer Begin err : ", err)
+		return err
+	}
+
 	execStr := fmt.Sprintf("insert into %s(mto,mfrom,txhash,value,blocknumber) values(?,?,?,?,?)", transferTable)
 
-	_, err := db.Exec(execStr, info.To, info.From, info.Txhash, info.Value, info.Blocknumber)
+	_, err = tx.Exec(execStr, info.To, info.From, info.Txhash, info.Value, info.Blocknumber)
 	if err != nil {
-		log.Errorln("sql SaveNewTransfer err : ", err)
+		log.Errorln("sql SaveNewTransfer Exec err : ", err)
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("sql SaveNewTransfer Commit err :", err)
 	}
 
 	return err

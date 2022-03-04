@@ -2,11 +2,16 @@ package erc20
 
 import (
 	"crypto/ecdsa"
+	"errors"
+	"eth-helper/db"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	log "github.com/sirupsen/logrus"
 )
 
 type ReturnClient struct {
@@ -19,6 +24,7 @@ type ReturnClient struct {
 	ReCaller   *TokenRecipientCaller
 }
 
+// GetClient 获取ethclient
 func GetClient() *ReturnClient {
 	node := "wss://rinkeby.infura.io/ws/v3/4a500de3b58c4ee29f06f412c041669c"
 	client, err := ethclient.Dial(node)
@@ -48,4 +54,32 @@ func GetClient() *ReturnClient {
 		Caller:   caller,
 		ReCaller: Recaller,
 	}
+}
+
+// NewAddress 生成地址
+func NewAddress() (db.MAddressInfo, error) {
+	info := db.MAddressInfo{}
+	// 生成私钥
+	privateKey, err := crypto.GenerateKey()
+	if err != nil {
+		log.Errorf("newAddress GenerateKey err :%v", err)
+		return info, err
+	}
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	fmt.Println("私钥为: " + hexutil.Encode(privateKeyBytes))
+	// 私钥导出地址
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		log.Errorln("newAddress cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+		return info, errors.New("publicKey is not of type *ecdsa.PublicKey")
+	}
+	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+	fmt.Println("地址为: " + address)
+
+	info.Address = address
+	// info.PrivateKey = privateKeyBytes
+	// info.Pwd = privateKeyBytes TODO 私钥加密
+
+	return info, nil
 }

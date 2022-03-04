@@ -53,13 +53,13 @@ func GetFristTransfer() (blocknumber uint64, err error) {
 }
 
 // GetTransferWithBlocknumber 获取某一高度的全部交易
-func GetTransferWithBlocknumber(num uint64) ([]MTransferInfo, error) {
+func GetTransferWithBlocknumber(blocknumber uint64) ([]MTransferInfo, error) {
 	db := openDB()
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
 	ss := fmt.Sprintf("select * from %s where blocknumber = ?", transferTable)
-	rows, err := db.Query(ss, num)
+	rows, err := db.Query(ss, blocknumber)
 
 	defer func() {
 		if rows != nil {
@@ -87,4 +87,19 @@ func GetTransferWithBlocknumber(num uint64) ([]MTransferInfo, error) {
 	}
 
 	return infos, nil
+}
+
+// DeleteTransfer 删除某个交易
+func DeleteTransfer(mid int64) error {
+	db := openDB()
+	// 延迟到函数结束关闭链接
+	defer db.Close()
+
+	ss := fmt.Sprintf("delete from %s where id = ?", transferTable)
+	_, err := db.Exec(ss, mid)
+	if err != nil {
+		fmt.Printf("DeleteTransfer err:%v", err)
+	}
+
+	return err
 }

@@ -11,10 +11,13 @@ import (
 )
 
 // 数据库里最小的blockNumber
-var blockNumberOfBD = uint64(0)
+// var blockNumberOfBD = uint64(0)
 
 // 确认数 (可配)
 var confirmNum = uint64(10)
+
+// 是否在检查确认中,如果是,则不再发起请求
+var isChecking = false
 
 // InitTask 初始化交易检查定时器
 func InitTask() {
@@ -28,13 +31,17 @@ func InitTask() {
 		<-t.C
 
 		log.Infoln("task...")
-		checkTransfer()
+		if !isChecking {
+			checkTransfer()
+		}
 	}
 }
 
 func checkTransfer() {
+	isChecking = true
+
 	c := erc20.GetClient()
-	defer c.Client.Close()
+	defer deferCheck(c)
 
 	// 数据库里最低的高度
 	numDB, err := db.GetFristTransfer()
@@ -48,7 +55,7 @@ func checkTransfer() {
 		return
 	}
 
-	log.Infof("task...num:%v,bn:%v", numDB, blockNumber)
+	log.Infof("checkTransfer...num:%v,bn:%v", numDB, blockNumber)
 	if blockNumber-numDB < confirmNum {
 		return
 	}
@@ -59,23 +66,30 @@ func checkTransfer() {
 	}
 
 	for _, transfer := range transfers {
-		if transactionReceipt(c, transfer.Txhash) {
-			// TODO 交易完成,发送给mq ,并从表里移除
-		} else {
-			// TODO 这里要考虑如果某个交易一直没完成,是否要从表里移除,不然会卡住
+
+		status, err := transactionReceipt(c, transfer.Txhash)
+		if err != nil {
+			continue
 		}
+
+		log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
+		if status {
+			// TODO 交易完成,发送给mq
+		}
+		// TODO 交易状态不管完成与否,都不再查询,从表里移除,可能要放到'交易完成表''交易失败表'
+		db.DeleteTransfer(transfer.ID)
 	}
 }
 
-func transactionReceipt(c *erc20.ReturnClient, hash string) bool {
+func transactionReceipt(c *erc20.ReturnClient, hash string) (bool, error) {
 	srt, err := c.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 	if err != nil {
-		log.Errorf("transactionReceipt TransactionReceipt err : %v", err)
-		return false
+		log.Errorf("transactionReceipt err : %v", err)
+		return false, err
 	}
-	log.Infof("srt------------Status:%v,BlockNumber:%v", srt.Status, srt.BlockNumber)
+	// log.Infof("srt------------Status:%v,BlockNumber:%v", srt.Status, srt.BlockNumber)
 
-	return srt.Status == 1
+	return srt.Status == 1, nil
 }
 
 // getBlockNumber 获取区块高度
@@ -86,4 +100,9 @@ func getBlockNumber(c *erc20.ReturnClient) (uint64, error) {
 	}
 
 	return bn, err
+}
+
+func deferCheck(c *erc20.ReturnClient) {
+	c.Client.Close()
+	isChecking = false
 }

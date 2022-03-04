@@ -4,6 +4,7 @@ import (
 	"eth-helper/db"
 	"eth-helper/erc20"
 
+	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -12,8 +13,18 @@ import (
 // InitWatchTransfer 初始化监听交易
 func InitWatchTransfer() {
 	// go watchChan()
+	list := db.GetAllAddressInfo()
+	// 监听地址
+	to := []common.Address{}
+	if len(list) <= 0 {
+		log.Errorln("InitWatchTransfer list is nil...")
+		return
+	}
+	for _, info := range list {
+		to = append(to, common.HexToAddress(info.Address))
+	}
 
-	go watchTransfer()
+	go watchTransfer(to)
 
 	// test
 	// testChan()
@@ -31,14 +42,14 @@ func InitWatchTransfer() {
 // }
 
 //  监听盲盒价格变化
-func watchTransfer() {
+func watchTransfer(to []common.Address) {
 	c := erc20.GetClient()
 	defer c.Client.Close()
 
 	messageChan := make(chan *erc20.TokenERC20Transfer, 100)
 	// from := []common.Address{}
 	// to := []common.Address{common.HexToAddress("0x6A859c1BD1D0722D7Bc3Df05a96FF7684dCA30eD")}
-	sub, err := c.Filter.WatchTransfer(nil, messageChan, nil, nil)
+	sub, err := c.Filter.WatchTransfer(nil, messageChan, nil, to)
 	if err != nil {
 		log.Errorf("WatchTransfer err : %v", err)
 		return

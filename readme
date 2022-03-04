@@ -15,3 +15,12 @@ keystore 每个address 一个文件  批量处理会不会卡
 然后隔一段时间,看看当前BlockNumber是不是比上面的BlockNumber大某一高度
 如果是,则拿这个哈希去TransactionReceipt
 看看status  如果是1  则算是交易完成
+
+可能要做
+动态添加地址,要重新监听
+
+还缺的东西
+私钥加密保存
+sql 换 github.com/jinzhu/gorm
+扫快服务
+

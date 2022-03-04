@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ReturnClient ethclient 结构体
 type ReturnClient struct {
 	Client     *ethclient.Client
 	PrivateKey *ecdsa.PrivateKey

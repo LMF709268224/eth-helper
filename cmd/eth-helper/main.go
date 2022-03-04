@@ -28,7 +28,7 @@ func main() {
 		},
 		&cli.StringFlag{
 			Name:  "sqluse",
-			Value: "root",
+			Value: "gouse",
 			Usage: "sql username",
 			// Destination: &sqluse,
 			EnvVars: []string{"BLOCKCHAIN_SQLUSE"},

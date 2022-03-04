@@ -6,6 +6,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	log "github.com/sirupsen/logrus"
 )
 
 // MAddressInfo 地址
@@ -55,9 +56,10 @@ func InitDB(use string, pass string, database string) {
 }
 
 func openDB() *sql.DB {
-	parm := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True", sqlUseName, sqlPassword, sqlDatabase)
+	// parm := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True", sqlUseName, sqlPassword, sqlDatabase)
 	// parm := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True", sqlUseName, sqlPassword, HOST, PORT, sqlDatabase, CHARSET)
-
+	parm := fmt.Sprintf("%s:%s@tcp(localhost)/%s?charset=utf8&parseTime=True&loc=Local", sqlUseName, sqlPassword, sqlDatabase)
+	log.Infoln("parm : ", parm)
 	db, err := sql.Open("mysql", parm)
 	if err != nil {
 		panic(err)

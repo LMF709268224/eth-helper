@@ -15,17 +15,18 @@ func SaveNewAddress(infos []MAddressInfo) error {
 	defer db.Close()
 
 	// TODO pwd 要去掉
-	sqlStr := fmt.Sprintf("NSERT INTO %s(address,pwd,addTime) VALUES", addressTable)
+	sqlStr := fmt.Sprintf("INSERT INTO %s(address,pwd,addTime) VALUES", addressTable)
 
 	vals := []interface{}{}
 	for _, data := range infos {
 		sqlStr += "(?,?,Now()),"
-		vals = append(vals, data.Pwd, data.Address)
+		vals = append(vals, data.Address, data.Pwd)
 	}
 
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
 	// prepare the statement
+	log.Infoln("SaveNewAddress sqlStr: ", sqlStr)
 	stmt, err := db.Prepare(sqlStr)
 	if err != nil {
 		log.Errorln("SaveNewAddress Prepare err : ", err)

@@ -10,9 +10,9 @@ import (
 
 // MAddressInfo 地址
 type MAddressInfo struct {
-	ID      int64  `json:"id"`
-	Address string `json:"address"` // 地址
-	// Pwd     string    `json:"pwd"`     // 加密私钥
+	ID      int64     `json:"id"`
+	Address string    `json:"address"` // 地址
+	Pwd     string    `json:"pwd"`     // 加密私钥
 	AddTime time.Time `json:"addtime"` // 创建时间
 	Balance int64     `json:"balance"` // 余额
 	Msg     string    `json:"msg"`     // 备注信息
@@ -29,15 +29,16 @@ type MTransferInfo struct {
 	From        string `json:"from"`        // from
 	Txhash      string `json:"txhash"`      // 交易哈希
 	Value       int64  `json:"value"`       // 交易值
-	Blocknumber int64  `json:"blocknumber"` // blocknumber
+	Blocknumber uint64 `json:"blocknumber"` // blocknumber
 }
 
 var (
-	sqlUseName    = ""
-	sqlPassword   = ""
-	sqlDatabase   = ""
-	addressTable  = "eth_address_key"
-	transferTable = "eth_transfer_key"
+	sqlUseName        = ""
+	sqlPassword       = ""
+	sqlDatabase       = ""
+	addressTable      = "eth_address_key"
+	transferTable     = "eth_transfer_key"
+	transferDoneTable = "eth_transferdone_key"
 )
 
 // const (

@@ -13,8 +13,17 @@ CREATE TABLE `eth_transfer_key` (
  	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
  	`mto` varchar(64) NOT NULL UNIQUE COMMENT 'to地址',
     `mfrom` varchar(64) NOT NULL COMMENT 'from地址',
- 	`txhash` varchar(225) NOT NULL COMMENT '交易哈希',
+ 	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
  	`value` BIGINT(20) ZEROFILL DEFAULT '0' COMMENT '交易值',
  	`blocknumber` bigint(20) DEFAULT '0' COMMENT 'BlockNumber',
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='待验证交易表';
+
+
+CREATE TABLE `eth_transferdone_key` (
+ 	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+ 	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
+ 	`status` int(20) DEFAULT '0' COMMENT '状态',
+ 	`msg` varchar(255) DEFAULT '' COMMENT '备注',
+ 	PRIMARY KEY (`id`)
+   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='交易完成表';

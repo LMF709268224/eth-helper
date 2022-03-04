@@ -12,14 +12,13 @@ import (
 func InitWatchTransfer() {
 	// go watchChan()
 	list := db.GetAllAddressInfo()
-
-	// 监听地址
-	to := []common.Address{}
 	if len(list) <= 0 {
 		log.Errorln("InitWatchTransfer list is nil...")
 		return
 	}
 
+	// 监听地址
+	to := []common.Address{}
 	for _, info := range list {
 		to = append(to, common.HexToAddress(info.Address))
 	}
@@ -61,7 +60,15 @@ func watchTransfer(to []common.Address) {
 }
 
 func newTransfer(transfer *erc20.TokenERC20Transfer) error {
-	return db.SaveNewTransfer(transfer.To.Hex(), transfer.From.Hex(), transfer.Raw.TxHash.Hex(), transfer.Value.Int64(), transfer.Raw.BlockNumber)
+	info := db.MTransferInfo{
+		To:          transfer.To.Hex(),
+		From:        transfer.From.Hex(),
+		Txhash:      transfer.Raw.TxHash.Hex(),
+		Value:       transfer.Value.Int64(),
+		Blocknumber: transfer.Raw.BlockNumber,
+	}
+
+	return db.SaveNewTransfer(info)
 }
 
 // func testChan() {

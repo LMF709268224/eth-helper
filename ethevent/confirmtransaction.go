@@ -71,31 +71,34 @@ func checkTransfer() {
 	}
 
 	for _, transfer := range transfers {
-
+		// 检查交易状态
 		status, err := transactionReceipt(c, transfer.Txhash)
 		if err != nil {
 			continue
 		}
 
 		log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
-		if status {
+		if status == 1 {
 			// TODO 交易完成,发送给mq
+			log.Infof("checkTransfer...ID:%d,交易:%v,完成了,要发送给前端.......", transfer.ID, transfer.Txhash)
 		}
 
-		// TODO 交易状态不管完成与否,都不再查询,从表里移除,可能要放到'交易完成表''交易失败表'
+		// 记录到交易完成表
+		db.SaveTransferStatus(transfer.Txhash, status, "")
+		// 交易状态不管完成与否,都不再查询,从表里移除
 		db.DeleteTransfer(transfer.ID)
 	}
 }
 
-func transactionReceipt(c *erc20.ReturnClient, hash string) (bool, error) {
+func transactionReceipt(c *erc20.ReturnClient, hash string) (uint64, error) {
 	srt, err := c.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 	if err != nil {
 		log.Errorf("transactionReceipt err : %v", err)
-		return false, err
+		return srt.Status, err
 	}
 	// log.Infof("srt------------Status:%v,BlockNumber:%v", srt.Status, srt.BlockNumber)
 
-	return srt.Status == 1, nil
+	return srt.Status, nil
 }
 
 // getBlockNumber 获取区块高度

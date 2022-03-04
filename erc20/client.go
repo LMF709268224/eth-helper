@@ -86,7 +86,7 @@ func NewAddress() (db.MAddressInfo, error) {
 	fmt.Println("地址为: " + address)
 
 	info.Address = address
-	// info.PrivateKey = privateKeyBytes
+	info.Pwd = hexutil.Encode(privateKeyBytes)
 	// info.Pwd = privateKeyBytes TODO 私钥加密
 
 	return info, nil

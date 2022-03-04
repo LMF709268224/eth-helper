@@ -6,15 +6,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// eth_transfer_key 表
+
 // SaveNewTransfer 保存待确认消息
-func SaveNewTransfer(to, from, raw string, value int64, blocknumber uint64) error {
+func SaveNewTransfer(info MTransferInfo) error {
 	db := openDB()
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
-	execStr := fmt.Sprintf("insert into %s(mto,mfrom,raw,value,blocknumber) values(?,?,?,?,?)", transferTable)
+	execStr := fmt.Sprintf("insert into %s(mto,mfrom,txhash,value,blocknumber) values(?,?,?,?,?)", transferTable)
 
-	_, err := db.Exec(execStr, to, from, raw, value, blocknumber)
+	_, err := db.Exec(execStr, info.To, info.From, info.Txhash, info.Value, info.Blocknumber)
 	if err != nil {
 		log.Errorln("sql SaveNewTransfer err : ", err)
 	}

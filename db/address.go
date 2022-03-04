@@ -6,28 +6,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// eth_address_key 表
+
 // SaveNewAddress 保存新地址
 func SaveNewAddress(infos []MAddressInfo) error {
 	db := openDB()
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
-	// var err error
-	// for _, data := range infos {
-	// 	execStr := fmt.Sprintf("insert into %s(address,ptype,privateKey,keyType,addTime) values(?,?,?,?,Now())", addressTable)
-
-	// 	_, e := db.Exec(execStr, data.Address, data.PType, data.PrivateKey, data.KeyType)
-	// 	if e != nil {
-	// 		err = e
-	// 		log.Errorln("sql SaveNewAddress err : ", e)
-	// 	}
-	// }
-	sqlStr := fmt.Sprintf("NSERT INTO %s(address,addTime) VALUES", addressTable)
+	// TODO pwd 要去掉
+	sqlStr := fmt.Sprintf("NSERT INTO %s(address,pwd,addTime) VALUES", addressTable)
 
 	vals := []interface{}{}
 	for _, data := range infos {
-		sqlStr += "(?,Now()),"
-		vals = append(vals, data.Address)
+		sqlStr += "(?,?,Now()),"
+		vals = append(vals, data.Pwd, data.Address)
 	}
 
 	// trim the last ,

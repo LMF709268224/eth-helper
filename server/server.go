@@ -20,9 +20,9 @@ type GenericHTTPRsp struct {
 	Result interface{} `json:"result,omitempty"`
 }
 
-func replyGeneric(w http.ResponseWriter, errCode int, msg string, result interface{}) {
+func replyGeneric(w http.ResponseWriter, msg string, result interface{}) {
 	gr := &GenericHTTPRsp{
-		ErrCode:    errCode,
+		// ErrCode:    errCode,
 		ErrMessage: msg,
 		Result:     result,
 	}
@@ -40,6 +40,7 @@ func replyGeneric(w http.ResponseWriter, errCode int, msg string, result interfa
 // StartHTTPServer 开启http服务
 func StartHTTPServer(port string) {
 	router := httprouter.New()
+	router.POST("/CreateAddresss", createAddresss)
 
 	log.Fatal(http.ListenAndServe(port, router))
 }

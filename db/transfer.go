@@ -6,18 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TODO 根据blocknumber排序
-
-// CREATE TABLE `eth_transfer_key` (
-// 	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-// 	`mto` varchar(64) NOT NULL UNIQUE COMMENT 'to地址',
-//  `mfrom` varchar(64) NOT NULL COMMENT 'from地址',
-// 	`txhash` varchar(225) NOT NULL COMMENT '交易哈希',
-// 	`value` decimal(65,30) ZEROFILL DEFAULT '0' COMMENT '交易值',
-// 	`blocknumber` bigint(20) ZEROFILL DEFAULT '0' COMMENT 'BlockNumber',
-// 	PRIMARY KEY (`id`)
-//   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='待验证交易表';
-
 // SaveNewTransfer 保存待确认消息
 func SaveNewTransfer(to, from, raw string, value int64, blocknumber uint64) error {
 	db := openDB()

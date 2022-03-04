@@ -6,19 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// CREATE TABLE `eth_address_key` (
-// 	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-// 	`address` varchar(64) NOT NULL UNIQUE COMMENT '地址',
-//  `pwd` varchar(512) NOT NULL COMMENT '加密私钥',
-// 	`ptype` varchar(50) NOT NULL COMMENT '类型',
-// 	`privateKey` blob COMMENT '私钥',
-// 	`keyType` varchar(50) NOT NULL COMMENT '私钥类型',
-// 	`msg` varchar(255) DEFAULT '' COMMENT '备注信息',
-//  `balance` decimal(65,30) ZEROFILL DEFAULT '0' COMMENT '余额',
-// 	`addTime` datetime DEFAULT NULL,
-// 	PRIMARY KEY (`id`)
-//   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='eth地址表';
-
 // SaveNewAddress 保存新地址
 func SaveNewAddress(infos []MAddressInfo) error {
 	db := openDB()
@@ -35,12 +22,12 @@ func SaveNewAddress(infos []MAddressInfo) error {
 	// 		log.Errorln("sql SaveNewAddress err : ", e)
 	// 	}
 	// }
-	sqlStr := fmt.Sprintf("NSERT INTO %s(address,ptype,privateKey,keyType,addTime) VALUES", addressTable)
+	sqlStr := fmt.Sprintf("NSERT INTO %s(address,addTime) VALUES", addressTable)
 
 	vals := []interface{}{}
 	for _, data := range infos {
-		sqlStr += "(?,?,?,?,Now()),"
-		vals = append(vals, data.Address, data.PType, data.PrivateKey, data.KeyType)
+		sqlStr += "(?,Now()),"
+		vals = append(vals, data.Address)
 	}
 
 	// trim the last ,
@@ -62,20 +49,20 @@ func SaveNewAddress(infos []MAddressInfo) error {
 }
 
 // GetAddressInfo 获取地址信息
-func GetAddressInfo(address string) (id int, privateKey []byte, keyType string) {
-	db := openDB()
-	// 延迟到函数结束关闭链接
-	defer db.Close()
+// func GetAddressInfo(address string) (id int, privateKey []byte, keyType string) {
+// 	db := openDB()
+// 	// 延迟到函数结束关闭链接
+// 	defer db.Close()
 
-	// 执行单条查询
-	skey := "address"
-	ss := fmt.Sprintf("select id,privateKey,keyType,ptype from %s where %s = ?", addressTable, skey)
-	rows := db.QueryRow(ss, address)
+// 	// 执行单条查询
+// 	skey := "address"
+// 	ss := fmt.Sprintf("select id,privateKey,keyType,ptype from %s where %s = ?", addressTable, skey)
+// 	rows := db.QueryRow(ss, address)
 
-	rows.Scan(&id, &privateKey, &keyType)
+// 	rows.Scan(&id, &privateKey, &keyType)
 
-	return id, privateKey, keyType
-}
+// 	return id, privateKey, keyType
+// }
 
 // ChangeBalance 修改余额
 func ChangeBalance(address string, balance int64) error {

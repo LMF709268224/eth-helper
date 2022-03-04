@@ -3,6 +3,8 @@ package main
 import (
 	"eth-helper/db"
 	"eth-helper/ethevent"
+	"eth-helper/server"
+	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -48,7 +50,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		// port := c.String("port")
+		port := c.String("port")
 		sqluse := c.String("sqluse")
 		sqlpass := c.String("sqlpass")
 		sqldatabase := c.String("sqldab")
@@ -64,8 +66,8 @@ func main() {
 		// ethevent.TestHttp()
 
 		// 4、开启Http服务
-		// params := fmt.Sprintf(":%s", port)
-		// server.StartHTTPServer(params)
+		params := fmt.Sprintf(":%s", port)
+		server.StartHTTPServer(params)
 
 		return nil
 	}
@@ -74,7 +76,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// test
-	select {}
 }

@@ -10,16 +10,16 @@ import (
 
 // MAddressInfo 地址
 type MAddressInfo struct {
-	ID      int64     `json:"id"`
-	Address string    `json:"address"` // 地址
-	Pwd     string    `json:"pwd"`     // 加密私钥
+	ID      int64  `json:"id"`
+	Address string `json:"address"` // 地址
+	// Pwd     string    `json:"pwd"`     // 加密私钥
 	AddTime time.Time `json:"addtime"` // 创建时间
+	Balance int64     `json:"balance"` // 余额
+	Msg     string    `json:"msg"`     // 备注信息
 
-	Balance    int64  `json:"balance"`    // 余额
-	PType      string `json:"ptype"`      // 类型
-	PrivateKey []byte `json:"privatekey"` // 私钥
-	KeyType    string `json:"keytype"`    // 私钥类型
-	Msg        string `json:"msg"`        // 备注信息
+	// PType      string `json:"ptype"`      // 类型
+	// PrivateKey []byte `json:"privatekey"` // 私钥
+	// KeyType    string `json:"keytype"`    // 私钥类型
 }
 
 // MTransferInfo 地址
@@ -40,6 +40,12 @@ var (
 	transferTable = "eth_transfer_key"
 )
 
+// const (
+// 	HOST    = "localhost"
+// 	PORT    = "3306"
+// 	CHARSET = "utf8"
+// )
+
 // InitDB 初始化数据
 func InitDB(use string, pass string, database string) {
 	sqlUseName = use
@@ -49,6 +55,7 @@ func InitDB(use string, pass string, database string) {
 
 func openDB() *sql.DB {
 	parm := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True", sqlUseName, sqlPassword, sqlDatabase)
+	// parm := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True", sqlUseName, sqlPassword, HOST, PORT, sqlDatabase, CHARSET)
 
 	db, err := sql.Open("mysql", parm)
 	if err != nil {

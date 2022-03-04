@@ -73,8 +73,10 @@ func GetTransferWithBlocknumber(blocknumber uint64) ([]MTransferInfo, error) {
 	}
 
 	infos := []MTransferInfo{}
+
 	for rows.Next() {
 		info := MTransferInfo{}
+
 		err = rows.Scan(&info.ID, &info.To, &info.From, &info.Txhash, &info.Value, &info.Blocknumber) // 不scan会导致连接不释放
 		if err != nil {
 			log.Errorf("GetTransferWithBlocknumber Scan err:%v", err)
@@ -96,6 +98,7 @@ func DeleteTransfer(mid int64) error {
 	defer db.Close()
 
 	ss := fmt.Sprintf("delete from %s where id = ?", transferTable)
+
 	_, err := db.Exec(ss, mid)
 	if err != nil {
 		fmt.Printf("DeleteTransfer err:%v", err)

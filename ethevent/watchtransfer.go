@@ -8,38 +8,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// var messageChan = make(chan *erc20.TokenERC20Transfer, 100)
-
 // InitWatchTransfer 初始化监听交易
 func InitWatchTransfer() {
 	// go watchChan()
 	list := db.GetAllAddressInfo()
+
 	// 监听地址
 	to := []common.Address{}
 	if len(list) <= 0 {
 		log.Errorln("InitWatchTransfer list is nil...")
 		return
 	}
+
 	for _, info := range list {
 		to = append(to, common.HexToAddress(info.Address))
 	}
 
 	go watchTransfer(to)
-
-	// test
-	// testChan()
-
-	// go test()
 }
-
-// func watchChan() {
-// 	for {
-// 		select {
-// 		case a := <-messageChan:
-// 			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", a.From, a.To, a.Value.Int64(), a.Raw.TxHash)
-// 		}
-// 	}
-// }
 
 //  监听盲盒价格变化
 func watchTransfer(to []common.Address) {
@@ -61,21 +47,21 @@ func watchTransfer(to []common.Address) {
 		select {
 		case err := <-sub.Err():
 			if err != nil {
-				log.Errorf("eWatchTransfer transfer err:%v", err)
+				log.Errorf("watchTransfer transfer err:%v", err)
 			}
 		case transfer := <-messageChan:
 			// log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From, transfer.To, transfer.Value.Int64(), transfer.Raw.TxHash)
-			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s,BlockNumber=%v", transfer.From.Hex(), transfer.To.Hex(), transfer.Value.Int64(), transfer.Raw.TxHash.Hex(), transfer.Raw.BlockNumber)
-			// newTransfer(transfer)
+			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From.Hex(), transfer.To.Hex(), transfer.Value.Int64(), transfer.Raw.TxHash.Hex())
+			err := newTransfer(transfer)
+			if err != nil {
+				log.Errorf("watchTransfer newTransfer err : %v,hash : %s", err, transfer.From.Hex())
+			}
 		}
 	}
 }
 
-func newTransfer(transfer *erc20.TokenERC20Transfer) {
-	err := db.SaveNewTransfer(transfer.To.Hex(), transfer.From.Hex(), transfer.Raw.TxHash.Hex(), transfer.Value.Int64(), transfer.Raw.BlockNumber)
-	if err != nil {
-		log.Errorf("newTransfer SaveNewTransfer err : %v", err)
-	}
+func newTransfer(transfer *erc20.TokenERC20Transfer) error {
+	return db.SaveNewTransfer(transfer.To.Hex(), transfer.From.Hex(), transfer.Raw.TxHash.Hex(), transfer.Value.Int64(), transfer.Raw.BlockNumber)
 }
 
 // func testChan() {

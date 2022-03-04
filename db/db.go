@@ -40,8 +40,6 @@ var (
 	transferTable = "eth_transfer_key"
 )
 
-// var addressTableMap = map[structconst.BlockchainType]string{structconst.BlockchainTypeFilecoin: addressFilecoinTable}
-
 // InitDB 初始化数据
 func InitDB(use string, pass string, database string) {
 	sqlUseName = use

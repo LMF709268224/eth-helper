@@ -52,12 +52,14 @@ func main() {
 		sqluse := c.String("sqluse")
 		sqlpass := c.String("sqlpass")
 		sqldatabase := c.String("sqldab")
+
 		// 初始化DB
 		db.InitDB(sqluse, sqlpass, sqldatabase)
 		// 监听交易消息
 		ethevent.InitWatchTransfer()
 		// 初始化检查交易定时器
 		go ethevent.InitTask()
+
 		// test
 		// ethevent.TestHttp()
 

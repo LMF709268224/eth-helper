@@ -36,12 +36,13 @@ func SaveNewAddress(infos []MAddressInfo) error {
 	// 	}
 	// }
 	sqlStr := fmt.Sprintf("NSERT INTO %s(address,ptype,privateKey,keyType,addTime) VALUES", addressTable)
-	// sqlStr := "INSERT INTO test(n1, n2, n3) VALUES "
+
 	vals := []interface{}{}
 	for _, data := range infos {
 		sqlStr += "(?,?,?,?,Now()),"
 		vals = append(vals, data.Address, data.PType, data.PrivateKey, data.KeyType)
 	}
+
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
 	// prepare the statement

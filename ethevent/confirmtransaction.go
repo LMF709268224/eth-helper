@@ -41,7 +41,10 @@ func checkTransfer() {
 	isChecking = true
 
 	c := erc20.GetClient()
-	defer deferCheck(c)
+	defer func() {
+		c.Client.Close()
+		isChecking = false
+	}()
 
 	// 数据库里最低的高度
 	numDB, err := db.GetFristTransfer()
@@ -56,9 +59,11 @@ func checkTransfer() {
 	}
 
 	log.Infof("checkTransfer...num:%v,bn:%v", numDB, blockNumber)
+
 	if blockNumber-numDB < confirmNum {
 		return
 	}
+
 	// 如果已经达到确认高度,则开始检查数据库里的交易
 	transfers, err := db.GetTransferWithBlocknumber(numDB)
 	if err != nil {
@@ -76,6 +81,7 @@ func checkTransfer() {
 		if status {
 			// TODO 交易完成,发送给mq
 		}
+
 		// TODO 交易状态不管完成与否,都不再查询,从表里移除,可能要放到'交易完成表''交易失败表'
 		db.DeleteTransfer(transfer.ID)
 	}
@@ -100,9 +106,4 @@ func getBlockNumber(c *erc20.ReturnClient) (uint64, error) {
 	}
 
 	return bn, err
-}
-
-func deferCheck(c *erc20.ReturnClient) {
-	c.Client.Close()
-	isChecking = false
 }

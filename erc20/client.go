@@ -41,14 +41,17 @@ func GetClient() *ReturnClient {
 		fmt.Println("Failed to Dial ", err)
 		return nil
 	}
+
 	caller, err := NewTokenERC20Caller(common.HexToAddress(contract), client)
 	if err != nil {
 		return nil
 	}
+
 	Recaller, err := NewTokenRecipientCaller(common.HexToAddress(contract), client)
 	if err != nil {
 		return nil
 	}
+
 	return &ReturnClient{
 		Client:   client,
 		Filter:   c,
@@ -60,14 +63,17 @@ func GetClient() *ReturnClient {
 // NewAddress 生成地址
 func NewAddress() (db.MAddressInfo, error) {
 	info := db.MAddressInfo{}
+
 	// 生成私钥
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
 		log.Errorf("newAddress GenerateKey err :%v", err)
 		return info, err
 	}
+
 	privateKeyBytes := crypto.FromECDSA(privateKey)
 	fmt.Println("私钥为: " + hexutil.Encode(privateKeyBytes))
+
 	// 私钥导出地址
 	publicKey := privateKey.Public()
 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
@@ -75,6 +81,7 @@ func NewAddress() (db.MAddressInfo, error) {
 		log.Errorln("newAddress cannot assert type: publicKey is not of type *ecdsa.PublicKey")
 		return info, errors.New("publicKey is not of type *ecdsa.PublicKey")
 	}
+
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
 	fmt.Println("地址为: " + address)
 

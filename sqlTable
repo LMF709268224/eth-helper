@@ -11,7 +11,7 @@ CREATE TABLE `eth_address_tb` (
 
 CREATE TABLE `eth_transfer_tb` (
  	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
- 	`mto` varchar(64) NOT NULL UNIQUE COMMENT 'to地址',
+ 	`mto` varchar(64) NOT NULL COMMENT 'to地址',
     `mfrom` varchar(64) NOT NULL COMMENT 'from地址',
  	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
  	`value` BIGINT(20) ZEROFILL DEFAULT '0' COMMENT '交易值',

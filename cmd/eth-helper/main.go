@@ -53,7 +53,6 @@ func main() {
 			Value: "0",
 			Usage: "create address num",
 			// Destination: &sqldab,
-			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
 		},
 	}
 
@@ -67,13 +66,13 @@ func main() {
 		db.InitDB(sqluse, sqlpass, sqldatabase)
 
 		// test create address
-		ca := c.Int("ca")
-		if ca > 0 {
-			err := ethevent.NewAddresss(ca)
-			if err != nil {
-				log.Errorf("main NewAddresss err: %v", err.Error())
-			}
-		}
+		// ca := c.Int("ca")
+		// if ca > 0 {
+		// 	err := ethevent.NewAddresss(ca)
+		// 	if err != nil {
+		// 		log.Errorf("main NewAddresss err: %v", err.Error())
+		// 	}
+		// }
 
 		// 监听交易消息
 		ethevent.InitWatchTransfer()

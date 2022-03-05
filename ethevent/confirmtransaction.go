@@ -13,7 +13,7 @@ import (
 // 数据库里最小的blockNumber
 // var blockNumberOfBD = uint64(0)
 
-// 确认数 (可配)
+// 确认数 (TODO可配)
 var confirmNum = uint64(10)
 
 // 是否在检查确认中,如果是,则不再发起请求
@@ -38,16 +38,16 @@ func InitTask() {
 }
 
 func checkTransfer() {
-	isChecking = true
-
 	c := erc20.GetClient()
 	defer func() {
 		c.Client.Close()
 		isChecking = false
 	}()
 
+	isChecking = true
+
 	// 数据库里最低的高度
-	numDB, err := db.GetFristTransfer()
+	numDB, err := db.GetMinBlocknumber()
 	if err != nil {
 		return
 	}

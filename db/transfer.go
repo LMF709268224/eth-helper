@@ -36,19 +36,20 @@ func SaveNewTransfer(info MTransferInfo) error {
 	return err
 }
 
-// GetFristTransfer 获取第一个,看看blocknumber
-func GetFristTransfer() (blocknumber uint64, err error) {
+// GetMinBlocknumber 获取最低blocknumber
+func GetMinBlocknumber() (blocknumber uint64, err error) {
 	db := openDB()
 	// 延迟到函数结束关闭链接
 	defer db.Close()
 
 	// 执行单条查询
-	ss := fmt.Sprintf("select blocknumber from %s limit 1", transferTable)
+	ss := fmt.Sprintf("select MIN(blocknumber) from  %s", transferTable)
+	// ss := fmt.Sprintf("select blocknumber from %s limit 1", transferTable)
 	row := db.QueryRow(ss)
 
 	err = row.Scan(&blocknumber)
 	if err != nil {
-		log.Errorf("GetFristTransfer Scan err : %v", err)
+		log.Errorf("GetMinBlocknumber Scan err : %v", err)
 	}
 
 	return

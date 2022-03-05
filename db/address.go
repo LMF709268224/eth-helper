@@ -43,20 +43,25 @@ func SaveNewAddress(infos []MAddressInfo) error {
 }
 
 // GetAddressInfo 获取地址信息
-// func GetAddressInfo(address string) (id int, privateKey []byte, keyType string) {
-// 	db := openDB()
-// 	// 延迟到函数结束关闭链接
-// 	defer db.Close()
+func GetAddressInfo(address string) (MAddressInfo, error) {
+	db := openDB()
+	// 延迟到函数结束关闭链接
+	defer db.Close()
 
-// 	// 执行单条查询
-// 	skey := "address"
-// 	ss := fmt.Sprintf("select id,privateKey,keyType,ptype from %s where %s = ?", addressTable, skey)
-// 	rows := db.QueryRow(ss, address)
+	info := MAddressInfo{}
 
-// 	rows.Scan(&id, &privateKey, &keyType)
+	// 执行单条查询
+	skey := "address"
+	ss := fmt.Sprintf("select id,address,balance from %s where %s = ?", addressTable, skey)
+	rows := db.QueryRow(ss, address)
 
-// 	return id, privateKey, keyType
-// }
+	err := rows.Scan(&info.ID, &info.Address, &info.Balance)
+	if err != nil {
+		log.Errorf("GetAddressInfo err:%v", err)
+	}
+
+	return info, err
+}
 
 // ChangeBalance 修改余额
 func ChangeBalance(address string, balance int64) error {

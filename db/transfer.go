@@ -27,14 +27,13 @@ func GetMinBlocknumber() (uint64, error) {
 	blocknumber := uint64(0)
 
 	ss := fmt.Sprintf("select MIN(blocknumber) from  %s", transferTable)
-	// ss := fmt.Sprintf("select blocknumber from %s limit 1", transferTable)
 	row := db.Raw(ss)
 
 	tx := row.Scan(&blocknumber)
 	if tx.Error != nil && tx.Error.Error() != "sql: Scan error on column index 0" {
 		log.Errorf("GetMinBlocknumber err : %v", tx.Error)
 	}
-	fmt.Printf("blocknumber : %v", blocknumber)
+	// fmt.Printf("blocknumber : %v", blocknumber)
 
 	return blocknumber, tx.Error
 }

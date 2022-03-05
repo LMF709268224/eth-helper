@@ -4,21 +4,32 @@ import (
 	"eth-helper/db"
 	"eth-helper/ethevent"
 	"eth-helper/server"
-	"eth-helper/test"
 	"fmt"
 	"os"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/urfave/cli/v2"
 )
 
-var testCommand = &cli.Command{
-	Name:    "test1",
-	Aliases: []string{"t1"},
-	Usage:   "Command selectQueryRow",
+var createAddressCommand = &cli.Command{
+	Name:    "ca",
+	Aliases: []string{"ca"},
+	Usage:   "创建地址",
 	Action: func(c *cli.Context) error {
-		test.TestG()
+		num := c.Args().Get(0)
+
+		n, err := strconv.Atoi(num)
+		if err != nil {
+			n = 1
+		}
+
+		err = ethevent.NewAddresss(n)
+		if err != nil {
+			log.Errorf("main NewAddresss err: %v", err.Error())
+		}
+
 		return nil
 	},
 }
@@ -33,42 +44,37 @@ func main() {
 		&cli.StringFlag{
 			Name:  "port",
 			Value: "7888",
-			Usage: "port of the server",
+			Usage: "http端口",
 			// Destination: &port,
 			EnvVars: []string{"BLOCKCHAIN_PORT"},
 		},
 		&cli.StringFlag{
 			Name:  "sqluse",
 			Value: "gouse",
-			Usage: "sql username",
+			Usage: "mysql用户名",
 			// Destination: &sqluse,
 			EnvVars: []string{"BLOCKCHAIN_SQLUSE"},
 		},
 		&cli.StringFlag{
 			Name:  "sqlpass",
 			Value: "123456",
-			Usage: "sql password",
+			Usage: "mysql密码",
 			// Destination: &sqlpass,
 			EnvVars: []string{"BLOCKCHAIN_SQLPASS"},
 		},
 		&cli.StringFlag{
 			Name:  "sqldab",
 			Value: "test",
-			Usage: "sql database",
+			Usage: "mysql数据库名",
 			// Destination: &sqldab,
 			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
 		},
-		// TEST
-		&cli.StringFlag{
-			Name:  "ca",
-			Value: "0",
-			Usage: "create address num",
-			// Destination: &sqldab,
-		},
 	}
+
 	app.Commands = []*cli.Command{
-		testCommand,
+		createAddressCommand,
 	}
+
 	app.Action = func(c *cli.Context) error {
 		port := c.String("port")
 		sqluse := c.String("sqluse")
@@ -78,17 +84,9 @@ func main() {
 		// 初始化DB
 		db.InitDB(sqluse, sqlpass, sqldatabase)
 
-		// test create address
-		ca := c.Int("ca")
-		if ca > 0 {
-			err := ethevent.NewAddresss(ca)
-			if err != nil {
-				log.Errorf("main NewAddresss err: %v", err.Error())
-			}
-		}
-
 		// 监听交易消息
 		ethevent.InitWatchTransfer()
+
 		// 初始化检查交易定时器
 		go ethevent.InitTask()
 

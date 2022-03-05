@@ -77,10 +77,14 @@ func checkTransfer() {
 
 		e := ""
 		if err != nil {
+			// 如果是 not found
 			e = err.Error()
+
+			// if err.Error() == "not found" {
+			// }
 		}
 
-		log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
+		// log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
 		if status == 1 {
 			// TODO 交易完成,发送给mq
 			log.Infof("checkTransfer...ID:%d,交易:%v,完成了,要发送给前端.......", transfer.ID, transfer.Txhash)
@@ -92,6 +96,7 @@ func checkTransfer() {
 			Status: int64(status),
 			Msg:    e,
 		})
+
 		// 交易状态不管完成与否,都不再查询,从表里移除
 		db.DeleteTransfer(transfer.ID)
 	}

@@ -8,6 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// var exit = make(chan bool, 1)
+
 // InitWatchTransfer 初始化监听交易
 func InitWatchTransfer() {
 	// go watchChan()
@@ -53,6 +55,11 @@ func watchTransfer(to []common.Address) {
 
 			// 这里可能会非常频繁
 			go newTransfer(transfer)
+			// case b := <-exit:
+			// 得有个退出机制
+			// 	if b {
+			// 		return
+			// 	}
 		}
 	}
 }

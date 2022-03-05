@@ -87,8 +87,7 @@ func getDBConnection() *gorm.DB {
 		return mdb
 	}
 
-	dsn := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True", "gouse", "123456", "test")
-	// dsn := "gouse:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True", sqlUseName, sqlPassword, sqlDatabase)
 	mdb, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)

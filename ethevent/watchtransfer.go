@@ -51,15 +51,12 @@ func watchTransfer(to []common.Address) {
 		case transfer := <-messageChan:
 			// log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From, transfer.To, transfer.Value.Int64(), transfer.Raw.TxHash)
 			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From.Hex(), transfer.To.Hex(), transfer.Value.Int64(), transfer.Raw.TxHash.Hex())
-			err := newTransfer(transfer)
-			if err != nil {
-				log.Errorf("watchTransfer newTransfer err : %v,hash : %s", err, transfer.From.Hex())
-			}
+			go newTransfer(transfer)
 		}
 	}
 }
 
-func newTransfer(transfer *erc20.TokenERC20Transfer) error {
+func newTransfer(transfer *erc20.TokenERC20Transfer) {
 	info := db.MTransferInfo{
 		To:          transfer.To.Hex(),
 		From:        transfer.From.Hex(),
@@ -68,7 +65,10 @@ func newTransfer(transfer *erc20.TokenERC20Transfer) error {
 		Blocknumber: transfer.Raw.BlockNumber,
 	}
 
-	return db.SaveNewTransfer(info)
+	err := db.SaveNewTransfer(info)
+	if err != nil {
+		log.Errorf("watchTransfer newTransfer err : %v,hash : %s", err, transfer.From.Hex())
+	}
 }
 
 // func testChan() {

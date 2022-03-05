@@ -26,7 +26,7 @@ func SaveNewAddress(infos []MAddressInfo) error {
 	// trim the last ,
 	sqlStr = sqlStr[0 : len(sqlStr)-1]
 	// prepare the statement
-	log.Infoln("SaveNewAddress sqlStr: ", sqlStr)
+	// log.Infoln("SaveNewAddress sqlStr: ", sqlStr)
 	stmt, err := db.Prepare(sqlStr)
 	if err != nil {
 		log.Errorln("SaveNewAddress Prepare err : ", err)

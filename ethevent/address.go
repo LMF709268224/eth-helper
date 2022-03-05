@@ -9,7 +9,7 @@ import (
 
 // NewAddresss num:address num
 func NewAddresss(num int) error {
-	infos := []db.MAddressInfo{}
+	infos := []db.EthAddressTb{}
 
 	for i := 0; i < num; i++ {
 		info, err := erc20.NewAddress()

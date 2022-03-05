@@ -6,6 +6,7 @@ import (
 	"eth-helper/db"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -61,8 +62,8 @@ func GetClient() *ReturnClient {
 }
 
 // NewAddress 生成地址
-func NewAddress() (db.MAddressInfo, error) {
-	info := db.MAddressInfo{}
+func NewAddress() (db.EthAddressTb, error) {
+	info := db.EthAddressTb{}
 
 	// 生成私钥
 	privateKey, err := crypto.GenerateKey()
@@ -87,6 +88,7 @@ func NewAddress() (db.MAddressInfo, error) {
 
 	info.Address = address
 	info.Pwd = hexutil.Encode(privateKeyBytes)
+	info.AddTime = time.Now()
 	// info.Pwd = privateKeyBytes TODO 私钥加密
 
 	return info, nil

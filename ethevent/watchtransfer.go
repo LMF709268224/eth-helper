@@ -49,6 +49,8 @@ func watchTransfer(to []common.Address) {
 				log.Errorf("watchTransfer transfer err:%v", err)
 			}
 		case transfer := <-messageChan:
+			log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From.Hex(), transfer.To.Hex(), transfer.Value.Int64(), transfer.Raw.TxHash.Hex())
+
 			// 这里可能会非常频繁
 			go newTransfer(transfer)
 		}
@@ -56,20 +58,19 @@ func watchTransfer(to []common.Address) {
 }
 
 func newTransfer(transfer *erc20.TokenERC20Transfer) {
-	log.Infof("from=%s,to=%s,数量=%d,交易hash=%s", transfer.From.Hex(), transfer.To.Hex(), transfer.Value.Int64(), transfer.Raw.TxHash.Hex())
-
 	// 保险起见,先判断是不是我们的地址
 	to := transfer.To.Hex()
 	infoDB, err := db.GetAddressInfo(to)
 	if err != nil || infoDB.Address != to {
 		return
 	}
+	log.Infof("to=%s,Hex=%s", to, transfer.Raw.TxHash.Hex())
 
-	info := db.MTransferInfo{
-		To:          to,
-		From:        transfer.From.Hex(),
+	info := db.EthTransferTb{
+		MTo:         to,
+		MFrom:       transfer.From.Hex(),
 		Txhash:      transfer.Raw.TxHash.Hex(),
-		Value:       transfer.Value.Int64(),
+		Value:       transfer.Value.String(),
 		Blocknumber: transfer.Raw.BlockNumber,
 	}
 

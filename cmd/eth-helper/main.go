@@ -4,6 +4,7 @@ import (
 	"eth-helper/db"
 	"eth-helper/ethevent"
 	"eth-helper/server"
+	"eth-helper/test"
 	"fmt"
 	"os"
 
@@ -11,6 +12,16 @@ import (
 
 	"github.com/urfave/cli/v2"
 )
+
+var testCommand = &cli.Command{
+	Name:    "test1",
+	Aliases: []string{"t1"},
+	Usage:   "Command selectQueryRow",
+	Action: func(c *cli.Context) error {
+		test.TestG()
+		return nil
+	},
+}
 
 func main() {
 	app := cli.NewApp()
@@ -55,7 +66,9 @@ func main() {
 			// Destination: &sqldab,
 		},
 	}
-
+	app.Commands = []*cli.Command{
+		testCommand,
+	}
 	app.Action = func(c *cli.Context) error {
 		port := c.String("port")
 		sqluse := c.String("sqluse")
@@ -66,13 +79,13 @@ func main() {
 		db.InitDB(sqluse, sqlpass, sqldatabase)
 
 		// test create address
-		// ca := c.Int("ca")
-		// if ca > 0 {
-		// 	err := ethevent.NewAddresss(ca)
-		// 	if err != nil {
-		// 		log.Errorf("main NewAddresss err: %v", err.Error())
-		// 	}
-		// }
+		ca := c.Int("ca")
+		if ca > 0 {
+			err := ethevent.NewAddresss(ca)
+			if err != nil {
+				log.Errorf("main NewAddresss err: %v", err.Error())
+			}
+		}
 
 		// 监听交易消息
 		ethevent.InitWatchTransfer()

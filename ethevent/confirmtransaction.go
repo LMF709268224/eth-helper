@@ -74,8 +74,10 @@ func checkTransfer() {
 	for _, transfer := range transfers {
 		// 检查交易状态
 		status, err := transactionReceipt(c, transfer.Txhash)
+
+		e := ""
 		if err != nil {
-			continue
+			e = err.Error()
 		}
 
 		log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
@@ -85,7 +87,11 @@ func checkTransfer() {
 		}
 
 		// 记录到交易完成表
-		db.SaveTransferStatus(transfer.Txhash, status, "")
+		db.SaveTransferStatus(db.EthTransferdoneTb{
+			Txhash: transfer.Txhash,
+			Status: int64(status),
+			Msg:    e,
+		})
 		// 交易状态不管完成与否,都不再查询,从表里移除
 		db.DeleteTransfer(transfer.ID)
 	}
@@ -95,7 +101,7 @@ func transactionReceipt(c *erc20.ReturnClient, hash string) (uint64, error) {
 	srt, err := c.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
 	if err != nil {
 		log.Errorf("transactionReceipt err : %v", err)
-		return srt.Status, err
+		return 0, err
 	}
 	// log.Infof("srt------------Status:%v,BlockNumber:%v", srt.Status, srt.BlockNumber)
 

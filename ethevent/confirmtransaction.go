@@ -10,17 +10,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// 数据库里最小的blockNumber
-// var blockNumberOfBD = uint64(0)
-
 // 确认数 (TODO可配)
-var confirmNum = uint64(10)
+var confirmBlockmeta = uint64(2)
 
 // 是否在检查确认中,如果是,则不再发起请求
 var isChecking = false
 
 // InitTask 初始化交易检查定时器
-func InitTask() {
+func InitTask(cb uint64) {
+	confirmBlockmeta = cb
+
 	timeSecond := 60 * 1
 	duration := time.Duration(time.Second * time.Duration(timeSecond))
 
@@ -61,7 +60,7 @@ func checkTransfer() {
 
 	log.Infof("checkTransfer...num:%v,bn:%v", numDB, blockNumber)
 
-	if blockNumber-numDB < confirmNum {
+	if blockNumber-numDB < confirmBlockmeta {
 		return
 	}
 

@@ -91,7 +91,7 @@ func main() {
 		// sqldatabase := c.String("sqldab")
 		configPath := c.String("c")
 
-		// 初始化配置
+		// 初始化配置文件
 		err := config.InitConfig(configPath)
 		if err != nil {
 			log.Errorln("InitConfig err :", err)
@@ -102,6 +102,7 @@ func main() {
 		databaseInfo := config.GetDatabaseConfig()
 		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
+		// 初始化以太坊合约相关配置
 		ethClientInfo := config.GetEthClientConfig()
 		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
 
@@ -109,7 +110,7 @@ func main() {
 		ethevent.InitWatchTransfer()
 
 		// 初始化检查交易定时器
-		go ethevent.InitTask()
+		go ethevent.InitTask(ethClientInfo.ConfirmBlockmeta)
 
 		// 开启Http服务
 		params := fmt.Sprintf(":%s", config.GetPort())

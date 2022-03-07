@@ -23,6 +23,7 @@ var createAddressCommand = &cli.Command{
 		num := c.Args().Get(0)
 		configPath := c.Args().Get(1)
 
+		// 创建个数
 		n, err := strconv.Atoi(num)
 		if err != nil {
 			n = 1

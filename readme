@@ -1,4 +1,5 @@
-eth 
+./eth-helper ca 2 ../../config/config.toml 
+./eth-helper -c ../../config/config.toml 
 
 1、地址生成:地址生成服务,调用钱包服务生成地址
 2、充币监听:钱包监听稳定币合约充值事件,如果to是钱包地址,则将充值数据发送到mq(from地址、to地址、金额、确认数),目前暂定12个确认数入账,超过12个确认数,钱包服务无需发送数据到mq

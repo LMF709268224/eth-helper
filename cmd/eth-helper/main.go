@@ -21,11 +21,23 @@ var createAddressCommand = &cli.Command{
 	Usage:   "创建地址",
 	Action: func(c *cli.Context) error {
 		num := c.Args().Get(0)
+		configPath := c.Args().Get(1)
 
 		n, err := strconv.Atoi(num)
 		if err != nil {
 			n = 1
 		}
+
+		// 初始化配置文件
+		err = config.InitConfig(configPath)
+		if err != nil {
+			log.Errorln("InitConfig err :", err)
+			return err
+		}
+
+		// 初始化DB
+		databaseInfo := config.GetDatabaseConfig()
+		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
 		err = ethevent.NewAddresss(n)
 		if err != nil {

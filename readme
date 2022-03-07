@@ -21,6 +21,5 @@ keystore 每个address 一个文件  批量处理会不会卡
 
 还缺的东西
 私钥加密保存
-sql 换 github.com/jinzhu/gorm
-扫快服务
+扫快服务(扫块之后,要先看看transferdone表里面有没有,没有才往transfer里面加)
 

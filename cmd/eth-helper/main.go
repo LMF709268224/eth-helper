@@ -1,6 +1,7 @@
 package main
 
 import (
+	"eth-helper/config"
 	"eth-helper/db"
 	"eth-helper/ethevent"
 	"eth-helper/server"
@@ -69,6 +70,13 @@ func main() {
 			// Destination: &sqldab,
 			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
 		},
+		&cli.StringFlag{
+			Name:  "c",
+			Value: "config.toml",
+			Usage: "配置路径",
+			// Destination: &sqldab,
+			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
+		},
 	}
 
 	app.Commands = []*cli.Command{
@@ -80,6 +88,10 @@ func main() {
 		sqluse := c.String("sqluse")
 		sqlpass := c.String("sqlpass")
 		sqldatabase := c.String("sqldab")
+		configPath := c.String("c")
+
+		// 初始化配置
+		config.InitConfig(configPath)
 
 		// 初始化DB
 		db.InitDB(sqluse, sqlpass, sqldatabase)

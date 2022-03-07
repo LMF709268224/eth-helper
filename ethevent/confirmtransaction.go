@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// 确认数 (TODO可配)
+// 确认数
 var confirmBlockmeta = uint64(2)
 
 // 是否在检查确认中,如果是,则不再发起请求
@@ -50,7 +50,7 @@ func checkTransfer() {
 	if err != nil {
 		return
 	}
-	log.Infoln("checkTransfer numDB...", numDB)
+	// log.Infoln("checkTransfer numDB...", numDB)
 
 	// 链上的高度
 	blockNumber, err := getBlockNumber(c)

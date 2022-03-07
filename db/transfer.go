@@ -30,8 +30,12 @@ func GetMinBlocknumber() (uint64, error) {
 	row := db.Raw(ss)
 
 	tx := row.Scan(&blocknumber)
-	if tx.Error != nil && tx.Error.Error() != "sql: Scan error on column index 0" {
-		log.Errorf("GetMinBlocknumber err : %s \n", tx.Error.Error())
+	if tx.Error != nil {
+		if tx.Error.Error() != "sql: Scan error on column index 0, name 'MIN(blocknumber)': converting NULL to uint64 is unsupported" {
+			log.Infoln("GetMinBlocknumber column index 0")
+		} else {
+			log.Errorf("GetMinBlocknumber err : %v", tx.Error)
+		}
 	}
 	// fmt.Printf("blocknumber : %v", blocknumber)
 

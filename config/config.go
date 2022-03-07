@@ -39,12 +39,6 @@ func InitConfig(configPath string) error {
 	conf = &config
 
 	return nil
-
-	// log.Printf("Title: %s\n", config.Port)
-	// log.Printf("Database: %s %v (Max conn. %d), \n",
-	// 	config.DB.DatabaseName, config.DB.UserName, config.DB.UserPassword)
-	// log.Printf("EthClient: %s %v \n",
-	// 	config.EC.ContractAddress, config.EC.NodeWss)
 }
 
 // GetDatabaseConfig 获取数据库配置

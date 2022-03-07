@@ -8,6 +8,6 @@ user_password = "123456"
 database_name = "test"
 
 [eth_client]
-confirm_blockmeta = 10
+confirm_blockmeta = 5
 node_wss = "wss://rinkeby.infura.io/ws/v3/4a500de3b58c4ee29f06f412c041669c"
 contract_address = "0xF71B99E8c9EF7fe986C9Ff3A4913855854f28C4D"

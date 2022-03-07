@@ -3,6 +3,7 @@ package main
 import (
 	"eth-helper/config"
 	"eth-helper/db"
+	"eth-helper/erc20"
 	"eth-helper/ethevent"
 	"eth-helper/server"
 	"fmt"
@@ -42,40 +43,40 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		// 有参数则用参数，没参数才会使用环境变量
-		&cli.StringFlag{
-			Name:  "port",
-			Value: "7888",
-			Usage: "http端口",
-			// Destination: &port,
-			EnvVars: []string{"BLOCKCHAIN_PORT"},
-		},
-		&cli.StringFlag{
-			Name:  "sqluse",
-			Value: "gouse",
-			Usage: "mysql用户名",
-			// Destination: &sqluse,
-			EnvVars: []string{"BLOCKCHAIN_SQLUSE"},
-		},
-		&cli.StringFlag{
-			Name:  "sqlpass",
-			Value: "123456",
-			Usage: "mysql密码",
-			// Destination: &sqlpass,
-			EnvVars: []string{"BLOCKCHAIN_SQLPASS"},
-		},
-		&cli.StringFlag{
-			Name:  "sqldab",
-			Value: "test",
-			Usage: "mysql数据库名",
-			// Destination: &sqldab,
-			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
-		},
+		// &cli.StringFlag{
+		// 	Name:  "port",
+		// 	Value: "7888",
+		// 	Usage: "http端口",
+		// 	// Destination: &port,
+		// 	EnvVars: []string{"BLOCKCHAIN_PORT"},
+		// },
+		// &cli.StringFlag{
+		// 	Name:  "sqluse",
+		// 	Value: "gouse",
+		// 	Usage: "mysql用户名",
+		// 	// Destination: &sqluse,
+		// 	EnvVars: []string{"BLOCKCHAIN_SQLUSE"},
+		// },
+		// &cli.StringFlag{
+		// 	Name:  "sqlpass",
+		// 	Value: "123456",
+		// 	Usage: "mysql密码",
+		// 	// Destination: &sqlpass,
+		// 	EnvVars: []string{"BLOCKCHAIN_SQLPASS"},
+		// },
+		// &cli.StringFlag{
+		// 	Name:  "sqldab",
+		// 	Value: "test",
+		// 	Usage: "mysql数据库名",
+		// 	// Destination: &sqldab,
+		// 	EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
+		// },
 		&cli.StringFlag{
 			Name:  "c",
 			Value: "config.toml",
 			Usage: "配置路径",
 			// Destination: &sqldab,
-			EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
+			// EnvVars: []string{"BLOCKCHAIN_SQLDATABASE"},
 		},
 	}
 
@@ -84,17 +85,25 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		port := c.String("port")
-		sqluse := c.String("sqluse")
-		sqlpass := c.String("sqlpass")
-		sqldatabase := c.String("sqldab")
+		// port := c.String("port")
+		// sqluse := c.String("sqluse")
+		// sqlpass := c.String("sqlpass")
+		// sqldatabase := c.String("sqldab")
 		configPath := c.String("c")
 
 		// 初始化配置
-		config.InitConfig(configPath)
+		err := config.InitConfig(configPath)
+		if err != nil {
+			log.Errorln("InitConfig err :", err)
+			return err
+		}
 
 		// 初始化DB
-		db.InitDB(sqluse, sqlpass, sqldatabase)
+		databaseInfo := config.GetDatabaseConfig()
+		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
+
+		ethClientInfo := config.GetEthClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
 
 		// 监听交易消息
 		ethevent.InitWatchTransfer()
@@ -103,7 +112,7 @@ func main() {
 		go ethevent.InitTask()
 
 		// 开启Http服务
-		params := fmt.Sprintf(":%s", port)
+		params := fmt.Sprintf(":%s", config.GetPort())
 		server.StartHTTPServer(params)
 
 		return nil

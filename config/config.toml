@@ -1,9 +1,12 @@
 
 #测试
-title = "TOML Example"
+http_port = "7888"
 
 [database]
-server = "192.168.1.1"
-ports = [ 8001, 8001, 8002 ]
-connection_max = 5000
-enabled = true
+user_name = "gouse"
+user_password = "123456"
+database_name = "test"
+
+[eth_client]
+node_wss = "wss://rinkeby.infura.io/ws/v3/4a500de3b58c4ee29f06f412c041669c"
+contract_address = "0xF71B99E8c9EF7fe986C9Ff3A4913855854f28C4D"

@@ -31,7 +31,7 @@ func GetMinBlocknumber() (uint64, error) {
 
 	tx := row.Scan(&blocknumber)
 	if tx.Error != nil && tx.Error.Error() != "sql: Scan error on column index 0" {
-		log.Errorf("GetMinBlocknumber err : %v", tx.Error)
+		log.Errorf("GetMinBlocknumber err : %s \n", tx.Error.Error())
 	}
 	// fmt.Printf("blocknumber : %v", blocknumber)
 

@@ -6,21 +6,21 @@
 3、提现:钱包服务提供接口勇于提现,传入to地址、金额、钱包服务发起转账
 4、归集:钱包服务内部将用户地址上的币进行归集到指定地址
 
-生成地址,离线生成,手动生成
-私钥加密保存
-mysql写入限制   max_allowed_packet
-keystore 每个address 一个文件  批量处理会不会卡
+监听消息的时候   
+1.拿到交易哈希、BlockNumber
+2.先保存哈希、BlockNumber
+3.然后隔一段时间,看看当前BlockNumber是不是比上面的BlockNumber大某一高度
+4.如果是,则拿这个哈希去TransactionReceipt
+5.看看status  如果是1  则算是交易完成
 
-监听消息的时候   拿到交易哈希、BlockNumber
-先保存哈希、BlockNumber
-然后隔一段时间,看看当前BlockNumber是不是比上面的BlockNumber大某一高度
-如果是,则拿这个哈希去TransactionReceipt
-看看status  如果是1  则算是交易完成
+还缺的东西
+1.私钥加密保存
+2.扫快服务(扫块之后,要先看看transferdone表里面有没有,没有才往transfer里面加)
+
+扫快服务:
+1.先把地址表数据导入到redis
+2.扫快后 for 在 redis 里查看是不是我们的地址
+3.如果是 则把数据写到 eth_transfer_tbs
 
 可能要做
 动态添加地址,要重新监听
-
-还缺的东西
-私钥加密保存
-扫快服务(扫块之后,要先看看transferdone表里面有没有,没有才往transfer里面加)
-

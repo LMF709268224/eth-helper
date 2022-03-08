@@ -15,6 +15,30 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var testCommand = &cli.Command{
+	Name:    "test",
+	Aliases: []string{"test"},
+	Usage:   "测试",
+	Action: func(c *cli.Context) error {
+		configPath := c.Args().Get(0)
+
+		// 初始化配置文件
+		err := config.InitConfig(configPath)
+		if err != nil {
+			log.Errorln("InitConfig err :", err)
+			return err
+		}
+
+		// 初始化DB
+		databaseInfo := config.GetDatabaseConfig()
+		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
+
+		ethevent.TestGetBlock()
+
+		return nil
+	},
+}
+
 var createAddressCommand = &cli.Command{
 	Name:    "ca",
 	Aliases: []string{"ca"},

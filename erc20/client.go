@@ -31,6 +31,7 @@ var (
 	contractaddress = ""
 )
 
+// Init 初始化 节点wss 合约地址
 func Init(ns, ca string) {
 	nodewss = ns
 	contractaddress = ca
@@ -103,3 +104,59 @@ func NewAddress() (db.EthAddressTb, error) {
 
 	return info, nil
 }
+
+// func main() {
+// 	privKey, address, err := KeystoreToPrivateKey("UTC--2017-11-21T05-46-23.555205600Z--6e60f5243e1a3f0be3f407b5afe9e5395ee82aa2", "123456789")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	fmt.Printf("privKey:%s\naddress:%s\n", privKey, address)
+// }
+
+// func KeystoreToPrivateKey(privateKeyFile, password string) (string, string, error) {
+// 	keyjson, err := ioutil.ReadFile(privateKeyFile)
+// 	if err != nil {
+// 		fmt.Println("read keyjson file failed：", err)
+// 	}
+// 	unlockedKey, err := keystore.DecryptKey(keyjson, password)
+// 	if err != nil {
+
+// 		return "", "", err
+
+// 	}
+// 	privKey := hex.EncodeToString(unlockedKey.PrivateKey.D.Bytes())
+// 	addr := crypto.PubkeyToAddress(unlockedKey.PrivateKey.PublicKey)
+// 	return privKey, addr.String(), nil
+// }
+
+// func createKs() {
+// 	ks := keystore.NewKeyStore("./tmp", keystore.StandardScryptN, keystore.StandardScryptP)
+// 	password := "123"
+// 	account, err := ks.NewAccount(password)
+// 	if err != nil {
+// 		log.Info("er:", err)
+// 	}
+
+// 	fmt.Println(account.Address.Hex())
+// }
+
+// func importKs() {
+// 	file := "./tmp/UTC--2022-03-03T04-30-43.877689000Z--ee01812ad65ca9ebd3ea9619aa007d73326b7570"
+// 	ks := keystore.NewKeyStore("./tmp", keystore.StandardScryptN, keystore.StandardScryptP)
+// 	jsonBytes, err := ioutil.ReadFile(file)
+// 	if err != nil {
+// 		log.Info("er:", err)
+// 	}
+
+// 	password := "123"
+// 	account, err := ks.Import(jsonBytes, password, password)
+// 	if err != nil {
+// 		log.Info("er:", err)
+// 	}
+
+// 	fmt.Println(account.Address.Hex()) // 0x20F8D42FB0F667F2E53930fed426f225752453b3
+
+// 	if err := os.Remove(file); err != nil {
+// 		log.Info("er:", err)
+// 	}
+// }

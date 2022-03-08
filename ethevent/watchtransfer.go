@@ -28,7 +28,7 @@ func InitWatchTransfer() {
 	go watchTransfer(to)
 }
 
-//  监听盲盒价格变化
+//  监听交易
 func watchTransfer(to []common.Address) {
 	c := erc20.GetClient()
 	defer c.Client.Close()

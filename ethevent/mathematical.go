@@ -41,6 +41,13 @@ func BigIntDiv(numstr string, num int64) string {
 	return m.String()
 }
 
+// StringToInt String 转 int
+func StringToInt(numstr string) int64 {
+	n, _ := new(big.Int).SetString(numstr, 10)
+
+	return n.Int64()
+}
+
 // TestMathematical 测试运算
 func TestMathematical() {
 	numstr := "1515631351536151161464461151511561"

@@ -40,7 +40,7 @@ type EthTransferTb struct {
 type EthTransferdoneTb struct {
 	ID     int64  `gorm:"column:id"`
 	Txhash string `gorm:"column:txhash"` // 交易哈希
-	Status int64  `gorm:"column:status"` // 交易值
+	State  int64  `gorm:"column:state"`  // 交易值
 	Msg    string `gorm:"column:msg"`    // 备注信息
 }
 

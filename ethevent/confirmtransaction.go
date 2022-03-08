@@ -91,7 +91,7 @@ func checkTransfer() {
 			// 记录到交易完成表
 			err = db.SaveTransferStatus(tx, db.EthTransferdoneTb{
 				Txhash: transfer.Txhash,
-				Status: int64(status),
+				State:  int64(status),
 				Msg:    errMsg,
 			})
 			if err != nil {
@@ -104,7 +104,7 @@ func checkTransfer() {
 			return err
 		})
 
-		log.Infoln("checkTransfer Transaction err :", err.Error())
+		log.Infof("checkTransfer Transaction err : %v", err)
 	}
 }
 

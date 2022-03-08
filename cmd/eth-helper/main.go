@@ -64,6 +64,10 @@ var createAddressCommand = &cli.Command{
 		databaseInfo := config.GetDatabaseConfig()
 		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
+		// 初始化以太坊合约相关配置
+		ethClientInfo := config.GetEthClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
+
 		err = ethevent.NewAddresss(n)
 		if err != nil {
 			log.Errorf("main NewAddresss err: %v", err.Error())

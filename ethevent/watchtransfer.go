@@ -82,7 +82,7 @@ func newTransfer(transfer *erc20.TokenERC20Transfer) {
 		Blocknumber: transfer.Raw.BlockNumber,
 	}
 
-	err = db.SaveNewTransfer(info)
+	err = db.SaveNewTransfer(nil, info)
 	if err != nil {
 		log.Errorf("watchTransfer newTransfer err : %v,hash : %s", err, transfer.From.Hex())
 	}

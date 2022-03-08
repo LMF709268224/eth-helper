@@ -17,8 +17,8 @@ var confirmBlockmeta = uint64(2)
 // 是否在检查确认中,如果是,则不再发起请求
 var isChecking = false
 
-// InitTask 初始化交易检查定时器
-func InitTask(cb uint64) {
+// InitTransferCheckTask 初始化交易检查定时器
+func InitTransferCheckTask(cb uint64) {
 	confirmBlockmeta = cb
 
 	timeSecond := 60 * 1

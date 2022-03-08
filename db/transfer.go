@@ -10,8 +10,10 @@ import (
 // eth_transfer_tbs 表
 
 // SaveNewTransfer 保存待确认消息
-func SaveNewTransfer(info EthTransferTb) error {
-	db := GetDBConnection()
+func SaveNewTransfer(db *gorm.DB, info EthTransferTb) error {
+	if db == nil {
+		db = GetDBConnection()
+	}
 
 	tx := db.Create(&info)
 	if tx.Error != nil {

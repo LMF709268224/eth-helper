@@ -23,9 +23,10 @@ type EthClient struct {
 
 // TomlConfig 配置
 type TomlConfig struct {
-	Port string    `toml:"http_port"`
-	DB   Database  `toml:"database"`
-	EC   EthClient `toml:"eth_client"`
+	Port        string    `toml:"http_port"`
+	DB          Database  `toml:"database"`
+	EC          EthClient `toml:"eth_client"`
+	BlockNumber int       `toml:"block_number"`
 }
 
 // InitConfig 初始化配置
@@ -54,4 +55,9 @@ func GetEthClientConfig() EthClient {
 // GetPort 获取http端口
 func GetPort() string {
 	return conf.Port
+}
+
+// GetBlockNumber 获取扫快高度
+func GetBlockNumber() int {
+	return conf.BlockNumber
 }

@@ -21,6 +21,20 @@ func SaveTransferStatus(db *gorm.DB, info EthTransferdoneTb) error {
 	return tx.Error
 }
 
+// GetTransferInfo 获取订单信息
+func GetTransferInfo(db *gorm.DB, hash string) (EthTransferdoneTb, error) {
+	// db := GetDBConnection()
+
+	var row EthTransferdoneTb
+	// select
+	tx := db.Where("txhash = ?", hash).Find(&row)
+	if tx.Error != nil {
+		log.Errorf("GetTransferInfo Error :%v", tx.Error)
+	}
+
+	return row, tx.Error
+}
+
 // // SaveTransferStatus 保存消息状态
 // func SaveTransferStatus(txhash string, status uint64, msg string) error {
 // 	db := openDB()

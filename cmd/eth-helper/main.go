@@ -156,7 +156,10 @@ func main() {
 		ethevent.InitWatchTransfer()
 
 		// 初始化检查交易定时器
-		go ethevent.InitTask(ethClientInfo.ConfirmBlockmeta)
+		go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)
+
+		// 初始化扫快定时器
+		go ethevent.InitScanningBlockTask(config.GetBlockNumber())
 
 		// 开启Http服务
 		params := fmt.Sprintf(":%s", config.GetPort())

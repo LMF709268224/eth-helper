@@ -82,7 +82,8 @@ func InitDB(use string, pass string, database string) {
 // 	return db
 // }
 
-func getDBConnection() *gorm.DB {
+// GetDBConnection 获取数据库链接
+func GetDBConnection() *gorm.DB {
 	if mdb != nil {
 		return mdb
 	}

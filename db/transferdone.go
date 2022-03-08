@@ -2,13 +2,16 @@ package db
 
 import (
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // eth_transferdone_tbs 表
 
 // SaveTransferStatus 保存消息状态
-func SaveTransferStatus(info EthTransferdoneTb) error {
-	db := getDBConnection()
+func SaveTransferStatus(db *gorm.DB, info EthTransferdoneTb) error {
+	// if db == nil {
+	// 	db = GetDBConnection()
+	// }
 
 	tx := db.Create(&info)
 	if tx.Error != nil {

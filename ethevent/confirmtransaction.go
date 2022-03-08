@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // 确认数
@@ -74,30 +75,36 @@ func checkTransfer() {
 		// 检查交易状态
 		status, err := transactionReceipt(c, transfer.Txhash)
 
-		e := ""
+		errMsg := ""
 		if err != nil {
 			// 如果是 not found
-			e = err.Error()
-
-			// if err.Error() == "not found" {
-			// }
+			errMsg = err.Error()
 		}
 
-		// log.Infof("checkTransfer...交易:%v,状态是:%b", transfer.Txhash, status)
-		if status == 1 {
-			// TODO 交易完成,发送给mq
-			log.Infof("checkTransfer...ID:%d,交易:%v,完成了,要发送给前端.......", transfer.ID, transfer.Txhash)
-		}
+		mdb := db.GetDBConnection()
+		err = mdb.Transaction(func(tx *gorm.DB) error {
+			if status == 1 {
+				// TODO 交易完成,发送给mq
+				log.Infof("checkTransfer...ID:%d,交易:%v,完成了,要发送给前端.......", transfer.ID, transfer.Txhash)
+			}
 
-		// 记录到交易完成表
-		db.SaveTransferStatus(db.EthTransferdoneTb{
-			Txhash: transfer.Txhash,
-			Status: int64(status),
-			Msg:    e,
+			// 记录到交易完成表
+			err = db.SaveTransferStatus(tx, db.EthTransferdoneTb{
+				Txhash: transfer.Txhash,
+				Status: int64(status),
+				Msg:    errMsg,
+			})
+			if err != nil {
+				return err
+			}
+
+			// 交易状态不管完成与否,都不再查询,从表里移除
+			err = db.DeleteTransfer(tx, transfer.ID)
+
+			return err
 		})
 
-		// 交易状态不管完成与否,都不再查询,从表里移除
-		db.DeleteTransfer(transfer.ID)
+		log.Infoln("checkTransfer Transaction err :", err.Error())
 	}
 }
 

@@ -23,7 +23,7 @@ CREATE TABLE `eth_transfer_tbs` (
 CREATE TABLE `eth_transferdone_tbs` (
  	`id` int(20) unsigned NOT NULL AUTO_INCREMENT,
  	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
- 	`status` int(20) DEFAULT '0' COMMENT '状态',
+ 	`status` int(20) DEFAULT '0' COMMENT '状态 1:成功 其他:失败',
  	`msg` varchar(255) DEFAULT '' COMMENT '备注',
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='交易完成表';

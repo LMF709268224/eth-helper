@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // eth_transfer_tbs 表
 
 // SaveNewTransfer 保存待确认消息
 func SaveNewTransfer(info EthTransferTb) error {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	tx := db.Create(&info)
 	if tx.Error != nil {
@@ -22,7 +23,7 @@ func SaveNewTransfer(info EthTransferTb) error {
 
 // GetMinBlocknumber 获取最低blocknumber
 func GetMinBlocknumber() (uint64, error) {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	blocknumber := uint64(0)
 
@@ -44,7 +45,7 @@ func GetMinBlocknumber() (uint64, error) {
 
 // GetTransferWithBlocknumber 获取某一高度的全部交易
 func GetTransferWithBlocknumber(blocknumber uint64) ([]EthTransferTb, error) {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	var rows []EthTransferTb
 	// select
@@ -57,8 +58,10 @@ func GetTransferWithBlocknumber(blocknumber uint64) ([]EthTransferTb, error) {
 }
 
 // DeleteTransfer 删除某个交易
-func DeleteTransfer(mid int64) error {
-	db := getDBConnection()
+func DeleteTransfer(db *gorm.DB, mid int64) error {
+	// if db == nil {
+	// 	db = GetDBConnection()
+	// }
 
 	var row []EthTransferTb
 

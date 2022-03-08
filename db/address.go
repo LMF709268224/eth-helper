@@ -8,7 +8,7 @@ import (
 
 // SaveNewAddress 保存新地址
 func SaveNewAddress(infos []EthAddressTb) error {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	tx := db.Create(&infos)
 	if tx.Error != nil {
@@ -20,7 +20,7 @@ func SaveNewAddress(infos []EthAddressTb) error {
 
 // GetAddressInfo 获取地址信息
 func GetAddressInfo(address string) (EthAddressTb, error) {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	var row EthAddressTb
 	// select
@@ -34,7 +34,7 @@ func GetAddressInfo(address string) (EthAddressTb, error) {
 
 // GetAllAddressInfo 获取所有地址信息
 func GetAllAddressInfo() []EthAddressTb {
-	db := getDBConnection()
+	db := GetDBConnection()
 
 	var rows []EthAddressTb
 	// select

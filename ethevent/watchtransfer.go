@@ -48,6 +48,7 @@ func watchTransfer(to []common.Address) {
 		select {
 		case err := <-sub.Err():
 			if err != nil {
+				// error通道，该通道将在订阅失败时发送消息
 				log.Errorf("watchTransfer transfer err:%v", err)
 			}
 		case transfer := <-messageChan:

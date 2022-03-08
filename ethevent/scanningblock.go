@@ -21,22 +21,36 @@ func TestGetBlock() {
 	}
 	log.Infoln("getBlockNumber num :", num)
 
-	header, err := getBlockHeaderByNumber(c, int64(num))
-	if err != nil {
-		return
-	}
+	// header, err := getBlockHeaderByNumber(c, int64(num))
+	// if err != nil {
+	// 	return
+	// }
 
-	block, err := getBlockByHash(c, header.TxHash)
-	if err != nil {
-		return
-	}
-	log.Infof("getBlockByHash : %v", block)
+	// block, err := getBlockByHash(c, header.TxHash)
+	// if err != nil {
+	// 	return
+	// }
+	// log.Infof("getBlockByHash : %v", block)
 
-	block, err = getBlockByNumber(c, int64(num))
+	block, err := getBlockByNumber(c, int64(num))
 	if err != nil {
 		return
 	}
 	log.Infof("getBlockByNumber : %v", block)
+
+	for _, tx := range block.Transactions() {
+		log.Infof("Hash: %s ,Value:%s, To:%s", tx.Hash().Hex(), tx.Value().String(), tx.To().Hex())
+
+		// chainID, err := c.Client.NetworkID(context.Background())
+		// if err != nil {
+		// 	log.Errorf("NetworkID:%v", err)
+		// 	continue
+		// }
+
+		// if msg, err := tx.AsMessage(types.NewEIP155Signer(chainID)); err == nil {
+		// 	fmt.Println(msg.From().Hex()) // 0x0fD081e3Bb178dc45c0cb23202069ddA57064258
+		// }
+	}
 }
 
 func getBlockHeaderByNumber(c *erc20.ReturnClient, num int64) (*types.Header, error) {

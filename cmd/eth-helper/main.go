@@ -33,6 +33,10 @@ var testCommand = &cli.Command{
 		databaseInfo := config.GetDatabaseConfig()
 		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
+		// 初始化以太坊合约相关配置
+		ethClientInfo := config.GetEthClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
+
 		ethevent.TestGetBlock()
 
 		return nil
@@ -123,6 +127,7 @@ func main() {
 
 	app.Commands = []*cli.Command{
 		createAddressCommand,
+		testCommand,
 	}
 
 	app.Action = func(c *cli.Context) error {

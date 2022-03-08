@@ -46,6 +46,25 @@ func GetAllAddressInfo() []EthAddressTb {
 	return rows
 }
 
+// GetAllAddress 获取所有地址
+func GetAllAddress() map[string]EthAddressTb {
+	db := GetDBConnection()
+
+	var rows []EthAddressTb
+	// select
+	tx := db.Find(&rows)
+	if tx.Error != nil {
+		log.Errorf("GetAllAddressInfo Error :%v", tx.Error)
+	}
+
+	mapInfo := make(map[string]EthAddressTb)
+	for _, row := range rows {
+		mapInfo[row.Address] = row
+	}
+
+	return mapInfo
+}
+
 // // SaveNewAddress 保存新地址
 // func SaveNewAddress(infos []EthAddressTb) error {
 // 	db := openDB()

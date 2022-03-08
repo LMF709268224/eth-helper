@@ -15,8 +15,13 @@ import (
 
 var blocknumber int
 
+var myAddress map[string]db.EthAddressTb
+
 // InitScanningBlockTask 初始化扫快
 func InitScanningBlockTask(num int) {
+	// 获取所有地址
+	myAddress = db.GetAllAddress()
+
 	blocknumber = num
 
 	timeSecond := 60 * 1
@@ -76,7 +81,7 @@ func readTransactions(block *types.Block) error {
 			to := transaction.To().Hex()
 			txHash := transaction.Hash().Hex()
 
-			if to != "myAddress" {
+			if _, ok := myAddress[to]; !ok {
 				// 不是我们自己的地址
 				continue
 			}

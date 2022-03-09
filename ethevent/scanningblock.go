@@ -134,7 +134,7 @@ func workerHander(num int) error {
 		if vstart == 0 {
 			continue
 		}
-		log.Info("find_a_token")
+		// log.Info("find_a_token")
 
 		// 验证合约
 		contract := tx["to"].(string)

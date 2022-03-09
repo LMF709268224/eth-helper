@@ -1,6 +1,8 @@
 package db
 
 import (
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -59,7 +61,8 @@ func GetAllAddress() map[string]EthAddressTb {
 
 	mapInfo := make(map[string]EthAddressTb)
 	for _, row := range rows {
-		mapInfo[row.Address] = row
+		lower := strings.ToLower(row.Address)
+		mapInfo[lower] = row
 	}
 
 	return mapInfo

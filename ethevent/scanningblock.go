@@ -5,6 +5,7 @@ import (
 	"eth-helper/db"
 	"eth-helper/erc20"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -21,6 +22,9 @@ var myAddress map[string]db.EthAddressTb
 func InitScanningBlockTask(num int) {
 	// 获取所有地址
 	myAddress = db.GetAllAddress()
+	for k, _ := range myAddress {
+		log.Println("a:", k)
+	}
 
 	blocknumber = num
 
@@ -33,7 +37,7 @@ func InitScanningBlockTask(num int) {
 	for {
 		<-t.C
 
-		log.Infoln("ScanningBlock task...")
+		log.Infoln("ScanningBlock task...:")
 		scanningBlock()
 	}
 }
@@ -50,6 +54,7 @@ func scanningBlock() {
 		blocknumber = blocknumberDB
 	}
 
+	log.Infoln("blocknumber...:", blocknumber)
 	// 扫快
 	block, err := getBlockByNumber(c, int64(blocknumber))
 	if err != nil {
@@ -82,7 +87,13 @@ func readTransactions(block *types.Block) error {
 			to := transaction.To().Hex()
 			txHash := transaction.Hash().Hex()
 
-			if _, ok := myAddress[to]; !ok {
+			if txHash == "0xeb377059a7814e49ba1cbd4800abf8b7aa0c99f648e1fd2b0ef32785a4750bbd" {
+				log.Infoln("readTransactions find to :", to)
+			}
+
+			tolower := strings.ToLower(to)
+			// log.Infoln("readTransactions find tolower :", tolower)
+			if _, ok := myAddress[tolower]; !ok {
 				// 不是我们自己的地址
 				continue
 			}

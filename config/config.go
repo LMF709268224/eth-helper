@@ -24,9 +24,9 @@ type EthClient struct {
 // TomlConfig 配置
 type TomlConfig struct {
 	Port        string    `toml:"http_port"`
+	BlockNumber int       `toml:"block_number"`
 	DB          Database  `toml:"database"`
 	EC          EthClient `toml:"eth_client"`
-	BlockNumber int       `toml:"block_number"`
 }
 
 // InitConfig 初始化配置

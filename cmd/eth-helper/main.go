@@ -153,7 +153,7 @@ func main() {
 		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
 
 		// 监听交易消息
-		ethevent.InitWatchTransfer()
+		// ethevent.InitWatchTransfer()
 
 		// 初始化检查交易定时器
 		go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)

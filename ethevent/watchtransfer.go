@@ -3,6 +3,8 @@ package ethevent
 import (
 	"eth-helper/db"
 	"eth-helper/erc20"
+	"eth-helper/redishelper"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
@@ -68,21 +70,22 @@ func watchTransfer(to []common.Address) {
 func newTransfer(transfer *erc20.TokenERC20Transfer) {
 	// 保险起见,先判断是不是我们的地址
 	to := transfer.To.Hex()
-	infoDB, err := db.GetAddressInfo(to)
-	if err != nil || infoDB.Address != to {
+	if !redishelper.ExistsAddress(to) {
 		return
 	}
-	log.Infof("to=%s,Hex=%s", to, transfer.Raw.TxHash.Hex())
 
+	log.Infof("to=%s,Hex=%s", to, transfer.Raw.TxHash.Hex())
+	txHash := transfer.Raw.TxHash.Hex()
 	info := db.EthTransferTb{
 		MTo:         to,
 		MFrom:       transfer.From.Hex(),
-		Txhash:      transfer.Raw.TxHash.Hex(),
+		Txhash:      txHash,
 		Value:       transfer.Value.String(),
 		Blocknumber: transfer.Raw.BlockNumber,
+		TxhashLower: strings.ToLower(txHash),
 	}
 
-	err = db.SaveNewTransfer(nil, info)
+	err := db.SaveNewTransfer(nil, info)
 	if err != nil {
 		log.Errorf("watchTransfer newTransfer err : %v,hash : %s", err, transfer.From.Hex())
 	}

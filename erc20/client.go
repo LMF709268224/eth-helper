@@ -6,6 +6,7 @@ import (
 	"eth-helper/db"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -100,6 +101,7 @@ func NewAddress() (db.EthAddressTb, error) {
 	info.Address = address
 	info.Pwd = hexutil.Encode(privateKeyBytes)
 	info.AddTime = time.Now()
+	info.AddressLower = strings.ToLower(address)
 	// info.Pwd = privateKeyBytes TODO 私钥加密
 
 	return info, nil

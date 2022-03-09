@@ -167,7 +167,7 @@ func workerHander(num int) error {
 func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string, num int, from string) error {
 	// 看看订单是否已经处理 eth_transferdone_tbs
 	info, err := db.GetTransferInfo(tx, txHash)
-	if err == nil && info.Txhash == txHash {
+	if err == nil && info.TxhashLower == strings.ToLower(txHash) {
 		// 在表里找到了 则不处理
 		log.Infoln("saveAndDelDb 在表里找到了 txHash :", txHash)
 		return nil
@@ -180,6 +180,7 @@ func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string, num int, 
 		Value:       value,
 		Blocknumber: uint64(num),
 		MFrom:       from,
+		TxhashLower: strings.ToLower(txHash),
 	})
 	if err != nil {
 		log.Errorf("saveAndDelDb SaveNewTransfer err : %v,hash : %s", err, txHash)

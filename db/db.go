@@ -14,12 +14,13 @@ var mdb *gorm.DB
 
 // EthAddressTb 地址表
 type EthAddressTb struct {
-	ID      int64     `gorm:"column:id"`
-	Address string    `gorm:"column:address"` // 地址
-	Pwd     string    `gorm:"column:pwd"`     // 加密私钥
-	AddTime time.Time `gorm:"column:addtime"` // 创建时间
-	Balance string    `gorm:"column:balance"` // 余额
-	Msg     string    `gorm:"column:msg"`     // 备注信息
+	ID           int64     `gorm:"column:id"`
+	Address      string    `gorm:"column:address"`      // 地址
+	Pwd          string    `gorm:"column:pwd"`          // 加密私钥
+	AddTime      time.Time `gorm:"column:addtime"`      // 创建时间
+	Balance      string    `gorm:"column:balance"`      // 余额
+	Msg          string    `gorm:"column:msg"`          // 备注信息
+	AddressLower string    `gorm:"column:addresslower"` // 地址转小写
 
 	// PType      string `json:"ptype"`      // 类型
 	// PrivateKey []byte `json:"privatekey"` // 私钥
@@ -34,14 +35,16 @@ type EthTransferTb struct {
 	Txhash      string `gorm:"column:txhash"`      // 交易哈希
 	Value       string `gorm:"column:value"`       // 交易值
 	Blocknumber uint64 `gorm:"column:blocknumber"` // blocknumber
+	TxhashLower string `gorm:"column:txhashlower"` // 交易哈希转小写
 }
 
 // EthTransferdoneTb 交易完成表
 type EthTransferdoneTb struct {
-	ID     int64  `gorm:"column:id"`
-	Txhash string `gorm:"column:txhash"` // 交易哈希
-	State  int64  `gorm:"column:state"`  // 交易状态
-	Msg    string `gorm:"column:msg"`    // 备注信息
+	ID          int64  `gorm:"column:id"`
+	Txhash      string `gorm:"column:txhash"`      // 交易哈希
+	State       int64  `gorm:"column:state"`       // 交易状态
+	Msg         string `gorm:"column:msg"`         // 备注信息
+	TxhashLower string `gorm:"column:txhashlower"` // 交易哈希转小写
 }
 
 var (

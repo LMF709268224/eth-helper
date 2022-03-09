@@ -4,6 +4,7 @@ CREATE TABLE `eth_address_tbs` (
     `pwd` varchar(512) COMMENT '加密私钥',
  	`msg` varchar(255) DEFAULT '' COMMENT '备注信息',
     `balance` varchar(225)  DEFAULT '0' COMMENT '余额',
+ 	`addresslower` varchar(64) NOT NULL UNIQUE COMMENT '地址转小写',
 	`addTime` datetime DEFAULT NULL,
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='eth地址表';
@@ -15,6 +16,7 @@ CREATE TABLE `eth_transfer_tbs` (
  	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
  	`value` varchar(225)  DEFAULT '0' COMMENT '交易值',
  	`blocknumber` int(20) DEFAULT '0' COMMENT 'BlockNumber',
+ 	`txhashlower` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希转小写',
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='待验证交易表';
 
@@ -23,5 +25,6 @@ CREATE TABLE `eth_transferdone_tbs` (
  	`txhash` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希',
  	`state` int(20) DEFAULT '0' COMMENT '状态 1:成功 其他:失败',
  	`msg` varchar(255) DEFAULT '' COMMENT '备注',
+ 	`txhashlower` varchar(225) NOT NULL UNIQUE COMMENT '交易哈希转小写',
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='交易完成表';

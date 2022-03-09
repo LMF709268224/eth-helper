@@ -27,7 +27,7 @@ func GetTransferInfo(db *gorm.DB, hash string) (EthTransferdoneTb, error) {
 
 	var row EthTransferdoneTb
 	// select
-	tx := db.Where("txhash = ?", hash).Find(&row)
+	tx := db.Where("txhashlower = ?", hash).Find(&row)
 	if tx.Error != nil {
 		log.Errorf("GetTransferInfo Error :%v", tx.Error)
 	}

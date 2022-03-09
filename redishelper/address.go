@@ -15,8 +15,7 @@ func AddAddress(infos []db.EthAddressTb) error {
 
 	args := []interface{}{KeyAddress}
 	for _, info := range infos {
-		lower := strings.ToLower(info.Address)
-		args = append(args, lower)
+		args = append(args, info.AddressLower)
 	}
 
 	_, err := conn.Do("SADD", args...)
@@ -31,6 +30,8 @@ func AddAddress(infos []db.EthAddressTb) error {
 func ExistsAddress(address string) bool {
 	conn := getConn()
 	defer conn.Close()
+
+	address = strings.ToLower(address)
 
 	existe, err := redis.Bool(conn.Do("SISMEMBER", KeyAddress, address))
 	if err != nil {

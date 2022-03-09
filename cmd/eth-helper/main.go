@@ -100,6 +100,9 @@ var createAddressCommand = &cli.Command{
 		databaseInfo := config.GetDatabaseConfig()
 		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
+		// 初始化redis
+		redishelper.InitServerAddress(config.GetRedisServer())
+
 		// 初始化以太坊合约相关配置
 		ethClientInfo := config.GetEthClientConfig()
 		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)

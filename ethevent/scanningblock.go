@@ -43,7 +43,7 @@ func InitScanningBlockTask(blockNumber int, contractAddress string, chainID int,
 	blocknumber = blockNumber
 
 	ethCheckCBTranNewTW = timewheel.New(1*time.Second, 3600, func(data interface{}) {
-		fmt.Println("start eth.cbi.watch.new...")
+		// fmt.Println("start eth.cbi.watch.new...")
 		// 区块操作处理
 		scanningBlock()
 		// 继续添加定时器
@@ -66,18 +66,29 @@ func scanningBlock() {
 		blocknumber = blocknumberDB
 	}
 
+	temp, err := getblocknumber()
+	blockhight := int(temp)
+	if err != nil {
+		log.Errorln("getblocknumber err :", err.Error())
+		return
+	}
+
+	if blockhight <= blocknumber {
+		return
+	}
+
 	// log.Infoln("blocknumber...:", blocknumber)
 	// 扫快  处理订单
-	err := workerHander(blocknumber)
+	err = workerHander(blocknumber)
 	if err != nil {
-		log.Infoln("workerHander err :", err.Error())
+		log.Errorln("workerHander err :", err.Error())
 		return
 	}
 
 	// 最新num存DB
 	err = redishelper.SaveBlockNumber(chainid, blocknumber)
 	if err != nil {
-		log.Infoln("SaveBlockNumber err :", err.Error())
+		log.Errorln("SaveBlockNumber err :", err.Error())
 	}
 
 	// blocknumber ++
@@ -159,7 +170,9 @@ func workerHander(num int) error {
 		return nil
 	})
 
-	log.Printf("Transaction err : %v", err)
+	if err != nil {
+		log.Printf("Transaction err : %v", err)
+	}
 
 	return nil
 }
@@ -187,6 +200,34 @@ func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string, num int, 
 	}
 
 	return err
+}
+
+// 获取区块高度
+func getblocknumber() (int64, error) {
+	send := make(map[string]interface{})
+	send["jsonrpc"] = "2.0"
+	send["method"] = "eth_blockNumber"
+	send["params"] = []string{}
+	send["id"] = chainid
+	rsp, err := post(send)
+	if err != nil {
+		return 0, err
+	}
+	//
+	data := make(map[string]interface{})
+	err = json.Unmarshal(rsp, &data)
+	if err != nil {
+		return 0, err
+	}
+	result, ok := data["result"]
+	if !ok {
+		return 0, nil
+	}
+	var balance string
+	balance, ok = result.(string)
+	number, err := strconv.ParseInt(balance, 0, 64)
+
+	return number, nil
 }
 
 func getblockBynumber(num int) ([]byte, error) {

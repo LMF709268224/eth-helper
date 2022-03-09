@@ -2,7 +2,7 @@
 #端口
 http_port = "7888"
 #从哪个高度开始扫快
-block_number = 10297666
+block_number = 10297885
 #redis
 redis_server = "127.0.0.1:6379"
 

@@ -159,7 +159,7 @@ func main() {
 		go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)
 
 		// 初始化扫快定时器
-		go ethevent.InitScanningBlockTask(config.GetBlockNumber())
+		go ethevent.InitScanningBlockTask(config.GetBlockNumber(), ethClientInfo.ContractAddress)
 
 		// 开启Http服务
 		params := fmt.Sprintf(":%s", config.GetPort())

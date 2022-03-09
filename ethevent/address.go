@@ -3,6 +3,7 @@ package ethevent
 import (
 	"eth-helper/db"
 	"eth-helper/erc20"
+	"eth-helper/redishelper"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -25,7 +26,15 @@ func NewAddresss(num int) error {
 	err := db.SaveNewAddress(infos)
 	if err != nil {
 		log.Errorf("NewAddresss SaveNewAddress err:%v", err)
+		return err
 	}
 
-	return err
+	// save redis
+	err = redishelper.AddAddress(infos)
+	if err != nil {
+		log.Errorf("NewAddresss AddAddress err:%v", err)
+		return err
+	}
+
+	return nil
 }

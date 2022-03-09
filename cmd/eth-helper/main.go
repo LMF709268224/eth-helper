@@ -5,6 +5,7 @@ import (
 	"eth-helper/db"
 	"eth-helper/erc20"
 	"eth-helper/ethevent"
+	"eth-helper/redishelper"
 	"eth-helper/server"
 	"fmt"
 	"os"
@@ -37,7 +38,38 @@ var testCommand = &cli.Command{
 		ethClientInfo := config.GetEthClientConfig()
 		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
 
-		ethevent.TestGetBlock()
+		// ethevent.TestGetBlock()
+
+		return nil
+	},
+}
+
+var syncDBAddressToRedis = &cli.Command{
+	Name:    "sa",
+	Aliases: []string{"sa"},
+	Usage:   "创建地址",
+	Action: func(c *cli.Context) error {
+		configPath := c.Args().Get(0)
+
+		// 初始化配置文件
+		err := config.InitConfig(configPath)
+		if err != nil {
+			log.Errorln("InitConfig err :", err)
+			return err
+		}
+
+		// 初始化DB
+		databaseInfo := config.GetDatabaseConfig()
+		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
+
+		redishelper.InitServerAddress(config.GetRedisServer())
+
+		infos := db.GetAllAddressInfo()
+		err = redishelper.AddAddress(infos)
+		if err != nil {
+			log.Errorln("AddAddress err :", err)
+			return err
+		}
 
 		return nil
 	},
@@ -128,6 +160,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		createAddressCommand,
 		testCommand,
+		syncDBAddressToRedis,
 	}
 
 	app.Action = func(c *cli.Context) error {
@@ -148,6 +181,8 @@ func main() {
 		databaseInfo := config.GetDatabaseConfig()
 		db.InitDB(databaseInfo.UserName, databaseInfo.UserPassword, databaseInfo.DatabaseName)
 
+		redishelper.InitServerAddress(config.GetRedisServer())
+
 		// 初始化以太坊合约相关配置
 		ethClientInfo := config.GetEthClientConfig()
 		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
@@ -156,7 +191,7 @@ func main() {
 		// ethevent.InitWatchTransfer()
 
 		// 初始化检查交易定时器
-		go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)
+		// go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)
 
 		// 初始化扫快定时器
 		go ethevent.InitScanningBlockTask(config.GetBlockNumber(), ethClientInfo.ContractAddress)

@@ -2,10 +2,10 @@ package ethevent
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"eth-helper/db"
 	"eth-helper/erc20"
+	"eth-helper/redishelper"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -14,8 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ouqiang/timewheel"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -23,37 +22,37 @@ import (
 var (
 	blocknumber int
 
-	myAddress map[string]db.EthAddressTb
-
 	chainid = 4
 
 	contractAddress = ""
+
+	ethCheckCBTranNewTW *timewheel.TimeWheel // 时间轮，检查交易状态
 )
 
 // InitScanningBlockTask 初始化扫快
 func InitScanningBlockTask(num int, ca string) {
+	// defer func() {
+	// 	// 删除定时器, 参数为添加定时器传递的唯一标识
+	// 	ethCheckCBTranNewTW.RemoveTimer("eth_check_cbi")
+	// 	// 停止时间轮
+	// 	ethCheckCBTranNewTW.Stop()
+	// }()
+
 	// 合约地址
 	contractAddress = ca
-	// 获取所有地址
-	myAddress = db.GetAllAddress()
-	for k, _ := range myAddress {
-		log.Println("a:", k)
-	}
 
 	blocknumber = num
 
-	timeSecond := 60 * 1
-	duration := time.Duration(time.Second * time.Duration(timeSecond))
-
-	t := time.NewTicker(duration)
-	defer t.Stop()
-
-	for {
-		<-t.C
-
-		log.Infoln("ScanningBlock task...:")
+	ethCheckCBTranNewTW = timewheel.New(1*time.Second, 3600, func(data interface{}) {
+		fmt.Println("start eth.cbi.watch.new...")
+		// 区块操作处理
 		scanningBlock()
-	}
+		// 继续添加定时器
+		ethCheckCBTranNewTW.AddTimer(5*time.Second, "eth_check_cbi", nil)
+	})
+	ethCheckCBTranNewTW.Start()
+	// 开始一个事件处理
+	ethCheckCBTranNewTW.AddTimer(5*time.Second, "eth_check_cbi", nil)
 }
 
 func scanningBlock() {
@@ -61,7 +60,7 @@ func scanningBlock() {
 	defer c.Client.Close()
 
 	// 读数据库看看数据库里的高度 blocknumberDB + 1
-	blocknumberDB := db.GetBlockNumber() + 1
+	blocknumberDB := redishelper.GetBlockNumber(chainid) + 1
 
 	// 对比配置高度 用值大的来开始扫
 	if blocknumberDB > blocknumber {
@@ -69,25 +68,18 @@ func scanningBlock() {
 	}
 
 	log.Infoln("blocknumber...:", blocknumber)
-
+	// 扫快  处理订单
 	err := workerHander(blocknumber)
 	if err != nil {
+		log.Infoln("workerHander err :", err.Error())
 		return
 	}
-	// // 扫快
-	// block, err := getBlockByNumber(c, int64(blocknumber))
-	// if err != nil {
-	// 	return
-	// }
-
-	// // 处理订单
-	// err = readTransactions(block)
-	// if err != nil {
-	// 	return
-	// }
 
 	// 最新num存DB
-	db.SaveBlockNumber(blocknumber)
+	err = redishelper.SaveBlockNumber(chainid, blocknumber)
+	if err != nil {
+		log.Infoln("SaveBlockNumber err :", err.Error())
+	}
 
 	// blocknumber ++
 	blocknumber++
@@ -153,9 +145,16 @@ func workerHander(num int) error {
 			}
 
 			txhash := tx["hash"].(string)
-			value := fmt.Sprintf("0x%s", input[vstart:138])
+			from := tx["from"].(string)
 
-			return saveAndDelDb(gdb, txhash, toAddress, value)
+			value := fmt.Sprintf("0x%s", input[vstart:138])
+			temp, _ := new(big.Int).SetString(value[2:], 16)
+			// float64_value, _ := decimal.NewFromBigInt(temp, int32(-deci)).Float64()
+
+			err = saveAndDelDb(gdb, txhash, toAddress, temp.String(), num, from)
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -166,10 +165,10 @@ func workerHander(num int) error {
 	return nil
 }
 
-func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string) error {
+func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string, num int, from string) error {
 	// 看看订单是否已经处理 eth_transferdone_tbs
-	_, err := db.GetTransferInfo(tx, txHash)
-	if err == nil {
+	info, err := db.GetTransferInfo(tx, txHash)
+	if err == nil && info.Txhash == txHash {
 		// 在表里找到了 则不处理
 		log.Infoln("saveAndDelDb 在表里找到了 txHash :", txHash)
 		return nil
@@ -177,9 +176,11 @@ func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string) error {
 
 	// 写到待处理表 eth_transfer_tbs
 	err = db.SaveNewTransfer(tx, db.EthTransferTb{
-		MTo:    to,
-		Txhash: txHash,
-		Value:  value,
+		MTo:         to,
+		Txhash:      txHash,
+		Value:       value,
+		Blocknumber: uint64(num),
+		MFrom:       from,
 	})
 	if err != nil {
 		log.Errorf("saveAndDelDb SaveNewTransfer err : %v,hash : %s", err, txHash)
@@ -208,11 +209,8 @@ func existsAddress(address string, chainid int, contract string) bool {
 	// field = strings.ToLower(field)
 	// return utils.Redis.HExists(key, field).Val()
 	field := strings.ToLower(address)
-	if _, ok := myAddress[field]; !ok {
-		// 不是我们自己的地址
-		return false
-	}
-	return true
+
+	return redishelper.ExistsAddress(field)
 }
 
 // post RPC数据
@@ -248,108 +246,108 @@ func post(send map[string]interface{}) ([]byte, error) {
 	return respBytes, nil
 }
 
-func readTransactions(block *types.Block) error {
-	// 在事务中处理
-	mdb := db.GetDBConnection()
-	err := mdb.Transaction(func(tx *gorm.DB) error {
-		for _, transaction := range block.Transactions() {
+// func readTransactions(block *types.Block) error {
+// 	// 在事务中处理
+// 	mdb := db.GetDBConnection()
+// 	err := mdb.Transaction(func(tx *gorm.DB) error {
+// 		for _, transaction := range block.Transactions() {
 
-			if transaction.To() == nil {
-				continue
-			}
+// 			if transaction.To() == nil {
+// 				continue
+// 			}
 
-			to := transaction.To().Hex()
-			txHash := transaction.Hash().Hex()
+// 			to := transaction.To().Hex()
+// 			txHash := transaction.Hash().Hex()
 
-			if txHash == "0xeb377059a7814e49ba1cbd4800abf8b7aa0c99f648e1fd2b0ef32785a4750bbd" {
-				log.Infoln("readTransactions find to :", to)
-			}
+// 			if txHash == "0xeb377059a7814e49ba1cbd4800abf8b7aa0c99f648e1fd2b0ef32785a4750bbd" {
+// 				log.Infoln("readTransactions find to :", to)
+// 			}
 
-			tolower := strings.ToLower(to)
-			// log.Infoln("readTransactions find tolower :", tolower)
-			if _, ok := myAddress[tolower]; !ok {
-				// 不是我们自己的地址
-				continue
-			}
+// 			tolower := strings.ToLower(to)
+// 			// log.Infoln("readTransactions find tolower :", tolower)
+// 			if _, ok := myAddress[tolower]; !ok {
+// 				// 不是我们自己的地址
+// 				continue
+// 			}
 
-			log.Infoln("readTransactions txHash :", txHash)
+// 			log.Infoln("readTransactions txHash :", txHash)
 
-			// 看看订单是否已经处理 eth_transferdone_tbs
-			_, err := db.GetTransferInfo(tx, txHash)
-			if err == nil {
-				// 在表里找到了 则不处理
-				log.Infoln("readTransactions在表里找到了 txHash :", txHash)
-				continue
-			}
+// 			// 看看订单是否已经处理 eth_transferdone_tbs
+// 			_, err := db.GetTransferInfo(tx, txHash)
+// 			if err == nil {
+// 				// 在表里找到了 则不处理
+// 				log.Infoln("readTransactions在表里找到了 txHash :", txHash)
+// 				continue
+// 			}
 
-			// 写到待处理表 eth_transfer_tbs
-			err = db.SaveNewTransfer(tx, db.EthTransferTb{
-				MTo:    to,
-				Txhash: txHash,
-				Value:  transaction.Value().String(),
-			})
-			if err != nil {
-				log.Errorf("readTransactions SaveNewTransfer err : %v,hash : %s", err, txHash)
-				return err
-			}
-		}
+// 			// 写到待处理表 eth_transfer_tbs
+// 			err = db.SaveNewTransfer(tx, db.EthTransferTb{
+// 				MTo:    to,
+// 				Txhash: txHash,
+// 				Value:  transaction.Value().String(),
+// 			})
+// 			if err != nil {
+// 				log.Errorf("readTransactions SaveNewTransfer err : %v,hash : %s", err, txHash)
+// 				return err
+// 			}
+// 		}
 
-		return nil
-	})
+// 		return nil
+// 	})
 
-	return err
-}
+// 	return err
+// }
 
-func getBlockByNumber(c *erc20.ReturnClient, num int64) (*types.Block, error) {
-	block, err := c.Client.BlockByNumber(context.Background(), big.NewInt(num))
-	if err != nil {
-		log.Errorf("getBlockByNumber BlockByNumber err : %v", err)
-	}
+// func getBlockByNumber(c *erc20.ReturnClient, num int64) (*types.Block, error) {
+// 	block, err := c.Client.BlockByNumber(context.Background(), big.NewInt(num))
+// 	if err != nil {
+// 		log.Errorf("getBlockByNumber BlockByNumber err : %v", err)
+// 	}
 
-	return block, err
-}
+// 	return block, err
+// }
 
-// TestGetBlock 测试
-func TestGetBlock() {
-	c := erc20.GetClient()
-	defer c.Client.Close()
+// // TestGetBlock 测试
+// func TestGetBlock() {
+// 	c := erc20.GetClient()
+// 	defer c.Client.Close()
 
-	num, err := getBlockNumber(c)
-	if err != nil {
-		return
-	}
-	log.Infoln("getBlockNumber num :", num)
+// 	num, err := getBlockNumber(c)
+// 	if err != nil {
+// 		return
+// 	}
+// 	log.Infoln("getBlockNumber num :", num)
 
-	block, err := getBlockByNumber(c, int64(num))
-	if err != nil {
-		return
-	}
-	log.Infof("getBlockByNumber : %v", block)
+// 	block, err := getBlockByNumber(c, int64(num))
+// 	if err != nil {
+// 		return
+// 	}
+// 	log.Infof("getBlockByNumber : %v", block)
 
-	for _, tx := range block.Transactions() {
-		// log.Infof("tx:%v", tx)
-		// log.Infof("Hash: %s ,Value:%s, To:%s", tx.Hash().Hex(), tx.Value().String(), tx.To().Hex())
-		log.Infoln(tx.Hash().Hex())     // 0x5d49fcaa394c97ec8a9c3e7bd9e8388d420fb050a52083ca52ff24b3b65bc9c2
-		log.Infoln(tx.Value().String()) // 10000000000000000
-		log.Infoln(tx.To())             // 0x55fE59D8Ad77035154dDd0AD0388D09Dd4047A8e
-		log.Infoln("---------------------")
-	}
-}
+// 	for _, tx := range block.Transactions() {
+// 		// log.Infof("tx:%v", tx)
+// 		// log.Infof("Hash: %s ,Value:%s, To:%s", tx.Hash().Hex(), tx.Value().String(), tx.To().Hex())
+// 		log.Infoln(tx.Hash().Hex())     // 0x5d49fcaa394c97ec8a9c3e7bd9e8388d420fb050a52083ca52ff24b3b65bc9c2
+// 		log.Infoln(tx.Value().String()) // 10000000000000000
+// 		log.Infoln(tx.To())             // 0x55fE59D8Ad77035154dDd0AD0388D09Dd4047A8e
+// 		log.Infoln("---------------------")
+// 	}
+// }
 
-func getBlockHeaderByNumber(c *erc20.ReturnClient, num int64) (*types.Header, error) {
-	header, err := c.Client.HeaderByNumber(context.Background(), big.NewInt(num))
-	if err != nil {
-		log.Errorf("getBlockHeaderByNumber HeaderByNumber err : %v", err)
-	}
+// func getBlockHeaderByNumber(c *erc20.ReturnClient, num int64) (*types.Header, error) {
+// 	header, err := c.Client.HeaderByNumber(context.Background(), big.NewInt(num))
+// 	if err != nil {
+// 		log.Errorf("getBlockHeaderByNumber HeaderByNumber err : %v", err)
+// 	}
 
-	return header, err
-}
+// 	return header, err
+// }
 
-func getBlockByHash(c *erc20.ReturnClient, hash common.Hash) (*types.Block, error) {
-	block, err := c.Client.BlockByHash(context.Background(), hash)
-	if err != nil {
-		log.Errorf("getBlockByHash BlockByHash err : %v", err)
-	}
+// func getBlockByHash(c *erc20.ReturnClient, hash common.Hash) (*types.Block, error) {
+// 	block, err := c.Client.BlockByHash(context.Background(), hash)
+// 	if err != nil {
+// 		log.Errorf("getBlockByHash BlockByHash err : %v", err)
+// 	}
 
-	return block, err
-}
+// 	return block, err
+// }

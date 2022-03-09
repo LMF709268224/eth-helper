@@ -1,8 +1,6 @@
 package db
 
 import (
-	"strings"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,25 +46,25 @@ func GetAllAddressInfo() []EthAddressTb {
 	return rows
 }
 
-// GetAllAddress 获取所有地址
-func GetAllAddress() map[string]EthAddressTb {
-	db := GetDBConnection()
+// // GetAllAddress 获取所有地址
+// func GetAllAddress() map[string]EthAddressTb {
+// 	db := GetDBConnection()
 
-	var rows []EthAddressTb
-	// select
-	tx := db.Find(&rows)
-	if tx.Error != nil {
-		log.Errorf("GetAllAddressInfo Error :%v", tx.Error)
-	}
+// 	var rows []EthAddressTb
+// 	// select
+// 	tx := db.Find(&rows)
+// 	if tx.Error != nil {
+// 		log.Errorf("GetAllAddressInfo Error :%v", tx.Error)
+// 	}
 
-	mapInfo := make(map[string]EthAddressTb)
-	for _, row := range rows {
-		lower := strings.ToLower(row.Address)
-		mapInfo[lower] = row
-	}
+// 	mapInfo := make(map[string]EthAddressTb)
+// 	for _, row := range rows {
+// 		lower := strings.ToLower(row.Address)
+// 		mapInfo[lower] = row
+// 	}
 
-	return mapInfo
-}
+// 	return mapInfo
+// }
 
 // // SaveNewAddress 保存新地址
 // func SaveNewAddress(infos []EthAddressTb) error {

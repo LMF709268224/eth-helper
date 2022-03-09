@@ -25,6 +25,7 @@ type EthClient struct {
 type TomlConfig struct {
 	Port        string    `toml:"http_port"`
 	BlockNumber int       `toml:"block_number"`
+	RedisServer string    `toml:"redis_server"`
 	DB          Database  `toml:"database"`
 	EC          EthClient `toml:"eth_client"`
 }
@@ -60,4 +61,8 @@ func GetPort() string {
 // GetBlockNumber 获取扫快高度
 func GetBlockNumber() int {
 	return conf.BlockNumber
+}
+
+func GetRedisServer() string {
+	return conf.RedisServer
 }

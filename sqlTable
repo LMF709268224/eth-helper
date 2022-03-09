@@ -8,7 +8,6 @@ CREATE TABLE `eth_address_tbs` (
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='eth地址表';
 
-
 CREATE TABLE `eth_transfer_tbs` (
  	`id` int(20) unsigned NOT NULL AUTO_INCREMENT,
  	`mto` varchar(64) NOT NULL COMMENT 'to地址',
@@ -18,7 +17,6 @@ CREATE TABLE `eth_transfer_tbs` (
  	`blocknumber` int(20) DEFAULT '0' COMMENT 'BlockNumber',
  	PRIMARY KEY (`id`)
    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='待验证交易表';
-
 
 CREATE TABLE `eth_transferdone_tbs` (
  	`id` int(20) unsigned NOT NULL AUTO_INCREMENT,

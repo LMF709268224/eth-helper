@@ -33,7 +33,7 @@ func InitScanningBlockTask(num int) {
 	for {
 		<-t.C
 
-		log.Infoln("task...")
+		log.Infoln("ScanningBlock task...")
 		scanningBlock()
 	}
 }
@@ -42,8 +42,8 @@ func scanningBlock() {
 	c := erc20.GetClient()
 	defer c.Client.Close()
 
-	// TODO 读数据库看看数据库里的高度 blocknumberDB + 1
-	blocknumberDB := 0
+	// 读数据库看看数据库里的高度 blocknumberDB + 1
+	blocknumberDB := db.GetBlockNumber() + 1
 
 	// 对比配置高度 用值大的来开始扫
 	if blocknumberDB > blocknumber {
@@ -62,7 +62,8 @@ func scanningBlock() {
 		return
 	}
 
-	// TODO 最新num存DB
+	// 最新num存DB
+	db.SaveBlockNumber(blocknumber)
 
 	// blocknumber ++
 	blocknumber++
@@ -86,10 +87,13 @@ func readTransactions(block *types.Block) error {
 				continue
 			}
 
+			log.Infoln("readTransactions txHash :", txHash)
+
 			// 看看订单是否已经处理 eth_transferdone_tbs
 			_, err := db.GetTransferInfo(tx, txHash)
 			if err == nil {
 				// 在表里找到了 则不处理
+				log.Infoln("readTransactions在表里找到了 txHash :", txHash)
 				continue
 			}
 

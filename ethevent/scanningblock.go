@@ -69,6 +69,7 @@ func scanningBlock() {
 	}
 
 	log.Infoln("blocknumber...:", blocknumber)
+
 	err := workerHander(blocknumber)
 	if err != nil {
 		return
@@ -96,7 +97,7 @@ func scanningBlock() {
 func workerHander(num int) error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("捕获到的错误：%s\n", r)
+			fmt.Printf("捕获到的错误:%s\n", r)
 		}
 	}()
 
@@ -112,78 +113,79 @@ func workerHander(num int) error {
 
 	// log.Info(txs)
 
-	for i := 0; i < len(txs); i++ {
-		tx := txs[i].(map[string]interface{})
-		if tx["to"] == nil { // 部署合约交易直接跳过
-			continue
-		}
-
-		input := tx["input"].(string)
-		// 不是token转账跳过
-		if strings.Count(input, "") < 138 || strings.Compare(input[0:10], "0xa9059cbb") != 0 {
-			continue
-		}
-
-		var vstart int
-		for i := 74; i < 138; i++ {
-			if input[i:i+1] != "0" {
-				vstart = i
-				break
+	// 在事务中处理
+	mdb := db.GetDBConnection()
+	err = mdb.Transaction(func(gdb *gorm.DB) error {
+		for i := 0; i < len(txs); i++ {
+			tx := txs[i].(map[string]interface{})
+			if tx["to"] == nil { // 不属合约交易直接跳过
+				continue
 			}
+
+			input := tx["input"].(string)
+			// 不是token转账跳过
+			if strings.Count(input, "") < 138 || strings.Compare(input[0:10], "0xa9059cbb") != 0 {
+				continue
+			}
+
+			var vstart int
+			for i := 74; i < 138; i++ {
+				if input[i:i+1] != "0" {
+					vstart = i
+					break
+				}
+			}
+			if vstart == 0 {
+				continue
+			}
+
+			// 验证合约
+			contract := tx["to"].(string)
+			// log.Info("contract : ", contract)
+			if strings.EqualFold(contract, contractAddress) == false {
+				continue
+			}
+
+			toAddress := fmt.Sprintf("0x%s", input[34:74])
+			ext := existsAddress(toAddress, chainid, tx["to"].(string))
+			if !ext {
+				continue
+			}
+
+			txhash := tx["hash"].(string)
+			value := fmt.Sprintf("0x%s", input[vstart:138])
+
+			return saveAndDelDb(gdb, txhash, toAddress, value)
 		}
-		if vstart == 0 {
-			continue
-		}
-		// log.Info("find_a_token")
 
-		// 验证合约
-		contract := tx["to"].(string)
+		return nil
+	})
 
-		log.Info("contract : ", contract)
-		// exists, _, deci := utils.IsExistsContract(contract)
-		// if !exists {
-		// 	log.Info("合约不一致：", contract)
-		// 	continue
-		// }
-		if strings.EqualFold(contract, contractAddress) == false {
-			log.Info("合约不一致：", contract)
-			continue
-		}
+	log.Printf("Transaction err : %v", err)
 
-		// fee_address := conf.Cfg.MustValue("eth", "fee_address")
-		// if fmt.Sprintf("0x%s", input[34:74]) == fee_address {
-		// 	continue
-		// }
-		// out_from_address := conf.Cfg.MustValue("eth", "out_from_address")
-		// if fmt.Sprintf("0x%s", input[34:74]) == out_from_address {
-		// 	continue
-		// }
-
-		ext := existsAddress(fmt.Sprintf("0x%s", input[34:74]), chainid, tx["to"].(string))
-		// log.Info("测试erc20:", fmt.Sprintf("0x%s", input[34:74]), p.Chainid, tx["to"].(string))
-		if !ext {
-			continue
-		}
-
-		log.Info("地址存在：", fmt.Sprintf("0x%s", input[34:74]), chainid, tx["to"].(string))
-
-		// 检查erc20代币转账是否成功
-		// if p.checkERC20IsSuccess(p.Url, tx["hash"].(string)) == false {
-		// 	log.Info("checkERC20IsSuccess_continue", tx["hash"].(string))
-		// 	continue
-		// }
-
-		// walletToken := new(models.WalletToken)
-		// walletToken.GetUidByAddress(fmt.Sprintf("0x%s", input[34:74]))
-
-		// log.Info("用户uid：", walletToken.Uid)
-
-		// ok, err := p.newOrder(walletToken.Uid, tx["from"].(string), fmt.Sprintf("0x%s", input[34:74]), p.Chainid, tx["to"].(string), fmt.Sprintf("0x%s", input[vstart:138]), tx["hash"].(string), tx["gas"].(string), tx["gasPrice"].(string), deci)
-		// log.Info("newOrder complete", ok, err)
-		// continue
-
-	}
 	return nil
+}
+
+func saveAndDelDb(tx *gorm.DB, txHash string, to string, value string) error {
+	// 看看订单是否已经处理 eth_transferdone_tbs
+	_, err := db.GetTransferInfo(tx, txHash)
+	if err == nil {
+		// 在表里找到了 则不处理
+		log.Infoln("saveAndDelDb 在表里找到了 txHash :", txHash)
+		return nil
+	}
+
+	// 写到待处理表 eth_transfer_tbs
+	err = db.SaveNewTransfer(tx, db.EthTransferTb{
+		MTo:    to,
+		Txhash: txHash,
+		Value:  value,
+	})
+	if err != nil {
+		log.Errorf("saveAndDelDb SaveNewTransfer err : %v,hash : %s", err, txHash)
+	}
+
+	return err
 }
 
 func getblockBynumber(num int) ([]byte, error) {

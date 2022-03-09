@@ -6,7 +6,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// GetBlockNumber
+// GetBlockNumber 获取已处理高度
 func GetBlockNumber(chainID int) int {
 	conn := getConn()
 	defer conn.Close()
@@ -20,7 +20,7 @@ func GetBlockNumber(chainID int) int {
 	return num
 }
 
-// SaveBlockNumber
+// SaveBlockNumber 保存已处理高度
 func SaveBlockNumber(chainID int, num int) error {
 	conn := getConn()
 	defer conn.Close()

@@ -20,28 +20,27 @@ import (
 )
 
 var (
-	blocknumber int
-
-	chainid = 4
-
-	contractAddress = ""
-
+	blocknumber         int
+	chainid             = 4
+	contract            = ""
+	nodehttps           = ""
 	ethCheckCBTranNewTW *timewheel.TimeWheel // 时间轮，检查交易状态
 )
 
 // InitScanningBlockTask 初始化扫快
-func InitScanningBlockTask(num int, ca string) {
+func InitScanningBlockTask(blockNumber int, contractAddress string, chainID int, nodeHTTPS string) {
 	// defer func() {
 	// 	// 删除定时器, 参数为添加定时器传递的唯一标识
 	// 	ethCheckCBTranNewTW.RemoveTimer("eth_check_cbi")
 	// 	// 停止时间轮
 	// 	ethCheckCBTranNewTW.Stop()
 	// }()
-
+	nodehttps = nodeHTTPS
+	chainid = chainID
 	// 合约地址
-	contractAddress = ca
+	contract = contractAddress
 
-	blocknumber = num
+	blocknumber = blockNumber
 
 	ethCheckCBTranNewTW = timewheel.New(1*time.Second, 3600, func(data interface{}) {
 		fmt.Println("start eth.cbi.watch.new...")
@@ -67,7 +66,7 @@ func scanningBlock() {
 		blocknumber = blocknumberDB
 	}
 
-	log.Infoln("blocknumber...:", blocknumber)
+	// log.Infoln("blocknumber...:", blocknumber)
 	// 扫快  处理订单
 	err := workerHander(blocknumber)
 	if err != nil {
@@ -132,9 +131,9 @@ func workerHander(num int) error {
 			}
 
 			// 验证合约
-			contract := tx["to"].(string)
+			cTo := tx["to"].(string)
 			// log.Info("contract : ", contract)
-			if strings.EqualFold(contract, contractAddress) == false {
+			if strings.EqualFold(cTo, contract) == false {
 				continue
 			}
 
@@ -221,11 +220,10 @@ func post(send map[string]interface{}) ([]byte, error) {
 		return nil, err
 	}
 	reader := bytes.NewReader(bytesData)
-	url := "https://rinkeby.infura.io/v3/a5c713d632f944df9a77d56cf08f9083"
 
-	log.Info(url)
+	// log.Info(url)
 
-	request, err := http.NewRequest("POST", url, reader)
+	request, err := http.NewRequest("POST", nodehttps, reader)
 	if err != nil {
 		log.Error(err)
 		return nil, err

@@ -8,7 +8,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// AddAddress
+// AddAddress 添加地址
 func AddAddress(infos []db.EthAddressTb) error {
 	conn := getConn()
 	defer conn.Close()
@@ -27,7 +27,7 @@ func AddAddress(infos []db.EthAddressTb) error {
 	return err
 }
 
-// ExistsAddress
+// ExistsAddress 判断地址是否存在
 func ExistsAddress(address string) bool {
 	conn := getConn()
 	defer conn.Close()

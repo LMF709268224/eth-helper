@@ -1,3 +1,4 @@
+同步旧地址到redis  ./eth-helper sa ../../config/config.toml 
 创建地址   ./eth-helper ca 2 ../../config/config.toml 
 正常启动   ./eth-helper -c ../../config/config.toml 
 

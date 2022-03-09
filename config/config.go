@@ -19,6 +19,8 @@ type EthClient struct {
 	ConfirmBlockmeta uint64 `toml:"confirm_blockmeta"`
 	NodeWss          string `toml:"node_wss"`
 	ContractAddress  string `toml:"contract_address"`
+	NodeHTTPS        string `toml:"node_https"`
+	ChainID          int    `toml:"chainid"`
 }
 
 // TomlConfig 配置

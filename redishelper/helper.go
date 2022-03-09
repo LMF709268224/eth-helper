@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	// KeyBlockNumber block number
+	// KeyBlockNumber 扫块高度表
 	KeyBlockNumber = "eth:bn"
-	// KeyAddress block number
+	// KeyAddress 地址缓存表
 	KeyAddress = "eth:address"
 )
 

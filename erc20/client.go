@@ -28,39 +28,60 @@ type ReturnClient struct {
 }
 
 var (
-	nodewss         = ""
-	contractaddress = ""
+	eURL      string
+	eContract string
+	pURL      string
+	pContract string
 )
 
 // Init 初始化 节点wss 合约地址
-func Init(ns, ca string) {
-	nodewss = ns
-	contractaddress = ca
+func Init(ethURL, ethContract, polygonURL, polygonContract string) {
+	eURL = ethURL
+	eContract = ethContract
+	pURL = polygonURL
+	pContract = polygonContract
 }
 
-// GetClient 获取ethclient
-func GetClient() *ReturnClient {
+// GetPolygonClient 获取polygon client
+func GetPolygonClient() *ReturnClient {
+	return getClient(pURL, pContract)
+}
+
+// GetEthClient 获取以太坊client
+func GetEthClient() *ReturnClient {
+	return getClient(eURL, eContract)
+}
+
+// getClient
+func getClient(url, contract string) *ReturnClient {
 	// node := "wss://rinkeby.infura.io/ws/v3/4a500de3b58c4ee29f06f412c041669c"
-	client, err := ethclient.Dial(nodewss)
+
+	client, err := ethclient.Dial(url)
 	if err != nil {
 		fmt.Println("Failed to Dial ", err)
 		return nil
+	}
+
+	if contract == "" {
+		return &ReturnClient{
+			Client: client,
+		}
 	}
 
 	// contract := "0xF71B99E8c9EF7fe986C9Ff3A4913855854f28C4D"
 
-	c, err := NewTokenERC20Filterer(common.HexToAddress(contractaddress), client)
+	c, err := NewTokenERC20Filterer(common.HexToAddress(contract), client)
 	if err != nil {
 		fmt.Println("Failed to Dial ", err)
 		return nil
 	}
 
-	caller, err := NewTokenERC20Caller(common.HexToAddress(contractaddress), client)
+	caller, err := NewTokenERC20Caller(common.HexToAddress(contract), client)
 	if err != nil {
 		return nil
 	}
 
-	Recaller, err := NewTokenRecipientCaller(common.HexToAddress(contractaddress), client)
+	Recaller, err := NewTokenRecipientCaller(common.HexToAddress(contract), client)
 	if err != nil {
 		return nil
 	}

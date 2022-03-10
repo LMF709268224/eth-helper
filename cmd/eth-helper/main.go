@@ -36,7 +36,8 @@ var testCommand = &cli.Command{
 
 		// 初始化以太坊合约相关配置
 		ethClientInfo := config.GetEthClientConfig()
-		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
+		polygonClientInfo := config.GetPolygonClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress, polygonClientInfo.NodeHTTPS, "")
 
 		// ethevent.TestGetBlock()
 
@@ -105,7 +106,8 @@ var createAddressCommand = &cli.Command{
 
 		// 初始化以太坊合约相关配置
 		ethClientInfo := config.GetEthClientConfig()
-		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress)
+		polygonClientInfo := config.GetPolygonClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress, polygonClientInfo.NodeHTTPS, "")
 
 		err = ethevent.NewAddresss(n)
 		if err != nil {
@@ -155,17 +157,18 @@ func main() {
 		redishelper.InitServerAddress(config.GetRedisServer())
 
 		// 初始化以太坊合约相关配置
-		ecInfo := config.GetEthClientConfig()
-		erc20.Init(ecInfo.NodeWss, ecInfo.ContractAddress)
+		ethClientInfo := config.GetEthClientConfig()
+		polygonClientInfo := config.GetPolygonClientConfig()
+		erc20.Init(ethClientInfo.NodeWss, ethClientInfo.ContractAddress, polygonClientInfo.NodeHTTPS, "")
 
 		// 监听交易消息
 		ethevent.InitWatchTransfer()
 
 		// 初始化检查交易定时器
-		go ethevent.InitTransferCheckTask(ecInfo.ConfirmBlockmeta)
+		go ethevent.InitTransferCheckTask(ethClientInfo.ConfirmBlockmeta)
 
 		// 初始化扫快定时器
-		go ethevent.InitScanningBlockTask(config.GetBlockNumber(), ecInfo.ContractAddress, ecInfo.ChainID, ecInfo.NodeHTTPS)
+		go ethevent.InitScanningBlockTask(config.GetBlockNumber(), ethClientInfo.ContractAddress, ethClientInfo.ChainID, ethClientInfo.NodeHTTPS)
 
 		// 开启Http服务
 		params := fmt.Sprintf(":%s", config.GetPort())

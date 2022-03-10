@@ -38,7 +38,7 @@ func InitTransferCheckTask(cb uint64) {
 }
 
 func checkTransfer() {
-	c := erc20.GetClient()
+	c := erc20.GetEthClient()
 	defer func() {
 		c.Client.Close()
 		isChecking = false
@@ -128,4 +128,31 @@ func getBlockNumber(c *erc20.ReturnClient) (uint64, error) {
 	}
 
 	return bn, err
+}
+
+// ConfirmOfPolygon 确认Polygon 交易 return:错误码,链当前高度,交易状态码,交易所在高度
+func ConfirmOfPolygon(hash string) (uint64, uint64, int64, error) {
+	c := erc20.GetPolygonClient()
+	defer func() {
+		c.Client.Close()
+	}()
+
+	// 链上的高度
+	blockNumber, err := getBlockNumber(c)
+	if err != nil {
+		log.Errorf("ConfirmOfPolygon getBlockNumber err : %v", err)
+		return 0, 0, 0, err
+	}
+
+	// 检查交易状态
+	srt, err := c.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
+	if err != nil {
+		log.Errorf("getBlockNumber transactionReceipt err : %v", err)
+		return 0, 0, 0, err
+	}
+
+	status := srt.Status
+	bNumber := srt.BlockNumber
+
+	return blockNumber, status, bNumber.Int64(), nil
 }

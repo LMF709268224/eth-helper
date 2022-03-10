@@ -14,8 +14,8 @@ type Database struct {
 	DatabaseName string `toml:"database_name"`
 }
 
-// EthClient 以太坊链配置
-type EthClient struct {
+// Client Client链配置
+type Client struct {
 	ConfirmBlockmeta uint64 `toml:"confirm_blockmeta"`
 	NodeWss          string `toml:"node_wss"`
 	ContractAddress  string `toml:"contract_address"`
@@ -25,11 +25,12 @@ type EthClient struct {
 
 // TomlConfig 配置
 type TomlConfig struct {
-	Port        string    `toml:"http_port"`
-	BlockNumber int       `toml:"block_number"`
-	RedisServer string    `toml:"redis_server"`
-	DB          Database  `toml:"database"`
-	EC          EthClient `toml:"eth_client"`
+	Port        string   `toml:"http_port"`
+	BlockNumber int      `toml:"block_number"`
+	RedisServer string   `toml:"redis_server"`
+	DB          Database `toml:"database"`
+	EC          Client   `toml:"eth_client"`
+	PC          Client   `toml:"polygon_client"`
 }
 
 // InitConfig 初始化配置
@@ -51,8 +52,13 @@ func GetDatabaseConfig() Database {
 }
 
 // GetEthClientConfig 获取以太坊链配置
-func GetEthClientConfig() EthClient {
+func GetEthClientConfig() Client {
 	return conf.EC
+}
+
+// GetPolygonClientConfig 获取Polygon链配置
+func GetPolygonClientConfig() Client {
+	return conf.PC
 }
 
 // GetPort 获取http端口

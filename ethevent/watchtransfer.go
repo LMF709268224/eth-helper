@@ -32,7 +32,7 @@ func InitWatchTransfer() {
 
 //  监听交易
 func watchTransfer(to []common.Address) {
-	c := erc20.GetClient()
+	c := erc20.GetEthClient()
 	defer c.Client.Close()
 
 	messageChan := make(chan *erc20.TokenERC20Transfer, 100)

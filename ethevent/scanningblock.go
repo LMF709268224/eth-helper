@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"eth-helper/db"
-	"eth-helper/erc20"
 	"eth-helper/redishelper"
 	"fmt"
 	"io/ioutil"
@@ -55,9 +54,6 @@ func InitScanningBlockTask(blockNumber int, contractAddress string, chainID int,
 }
 
 func scanningBlock() {
-	c := erc20.GetClient()
-	defer c.Client.Close()
-
 	// 读数据库看看数据库里的高度 blocknumberDB + 1
 	blocknumberDB := redishelper.GetBlockNumber(chainid) + 1
 
